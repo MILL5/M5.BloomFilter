@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "M5.BloomFilter", "M5.BloomFilter\M5.BloomFilter.csproj", "{047B2449-FB55-4E6D-9BE4-D3C3824D6335}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "M5.BloomFilter.UnitTests", "M5.BloomFilter.UnitTests\M5.BloomFilter.UnitTests.csproj", "{5BEDE460-4E30-48E8-A53F-79539FCCF514}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M5.BitArraySerialization.Json", "M5.BitArraySerialization.Json\M5.BitArraySerialization.Json.csproj", "{257375D1-BDEC-4622-9AE9-E627C26C3AE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M5.BitArraySerialization.gRPC", "M5.BitArraySerialization.gRPC\M5.BitArraySerialization.gRPC.csproj", "{F3CF632B-6E8A-4185-9719-EB07BB9687C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M5.BitArraySerialization.Json.UnitTests", "M5.BitArraySerialization.Json.UnitTests\M5.BitArraySerialization.Json.UnitTests.csproj", "{68EA3F96-9CC2-4E3C-A2F1-95F3BAE280FC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "M5.BitArraySerialization", "M5.BitArraySerialization", "{A375395C-8A5A-4504-BD2B-E468D07AC0F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M5.BitArraySerialization.gRPC.UnitTests", "M5.BitArraySerialization.gRPC.UnitTests\M5.BitArraySerialization.gRPC.UnitTests.csproj", "{A9674ED3-CE57-479F-98B2-49B29116201C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{047B2449-FB55-4E6D-9BE4-D3C3824D6335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{047B2449-FB55-4E6D-9BE4-D3C3824D6335}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{047B2449-FB55-4E6D-9BE4-D3C3824D6335}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{047B2449-FB55-4E6D-9BE4-D3C3824D6335}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BEDE460-4E30-48E8-A53F-79539FCCF514}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BEDE460-4E30-48E8-A53F-79539FCCF514}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BEDE460-4E30-48E8-A53F-79539FCCF514}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BEDE460-4E30-48E8-A53F-79539FCCF514}.Release|Any CPU.Build.0 = Release|Any CPU
+		{257375D1-BDEC-4622-9AE9-E627C26C3AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{257375D1-BDEC-4622-9AE9-E627C26C3AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{257375D1-BDEC-4622-9AE9-E627C26C3AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{257375D1-BDEC-4622-9AE9-E627C26C3AE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3CF632B-6E8A-4185-9719-EB07BB9687C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3CF632B-6E8A-4185-9719-EB07BB9687C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3CF632B-6E8A-4185-9719-EB07BB9687C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3CF632B-6E8A-4185-9719-EB07BB9687C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68EA3F96-9CC2-4E3C-A2F1-95F3BAE280FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68EA3F96-9CC2-4E3C-A2F1-95F3BAE280FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68EA3F96-9CC2-4E3C-A2F1-95F3BAE280FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68EA3F96-9CC2-4E3C-A2F1-95F3BAE280FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9674ED3-CE57-479F-98B2-49B29116201C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9674ED3-CE57-479F-98B2-49B29116201C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9674ED3-CE57-479F-98B2-49B29116201C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9674ED3-CE57-479F-98B2-49B29116201C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{257375D1-BDEC-4622-9AE9-E627C26C3AE5} = {A375395C-8A5A-4504-BD2B-E468D07AC0F3}
+		{F3CF632B-6E8A-4185-9719-EB07BB9687C1} = {A375395C-8A5A-4504-BD2B-E468D07AC0F3}
+		{68EA3F96-9CC2-4E3C-A2F1-95F3BAE280FC} = {A375395C-8A5A-4504-BD2B-E468D07AC0F3}
+		{A9674ED3-CE57-479F-98B2-49B29116201C} = {A375395C-8A5A-4504-BD2B-E468D07AC0F3}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E4E9E293-9B4A-4C3D-882E-D169524649E1}
+	EndGlobalSection
+EndGlobal

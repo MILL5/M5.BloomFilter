@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Company>MILL5</Company>
+    <Authors>MILL5</Authors>
+    <PackageId>M5.BitArraySerialization.Json</PackageId>
+    <Description>Serialization for BitArray in .NET with support for Newtonsoft.JSON and System.Text.Json serialization.</Description>
+    <Copyright>Copyright © MILL5, LLC 2021</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/MILL5/M5.BloomFilter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MILL5/M5.BloomFilter</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>serialization;bit;array;json</PackageTags>
+    <PackageIcon>bitarray_400-min.png</PackageIcon>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bitarray_400-min.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
