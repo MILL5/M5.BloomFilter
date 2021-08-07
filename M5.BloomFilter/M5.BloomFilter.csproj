@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>MILL5</Authors>
+    <Company>MILL5</Company>
+    <Copyright>Copyright © MILL5, LLC 2021</Copyright>
+    <Description>An implementation of a Bloom Filter.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/MILL5/M5.BloomFilter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MILL5/M5.BloomFilter</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+	<IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<PackageTags>bloom;filter;set;hash;dictionary;map</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
