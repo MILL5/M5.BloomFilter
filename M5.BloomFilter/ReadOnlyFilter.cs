@@ -21,7 +21,7 @@ namespace M5.BloomFilter
             Statistics = new Statistics(m, n, k, p);
         }
 
-        public ReadOnlyFilter(Filter filter)
+        public ReadOnlyFilter(IBloomFilter filter)
         {
             CheckIsNotNull(nameof(filter), filter);
 

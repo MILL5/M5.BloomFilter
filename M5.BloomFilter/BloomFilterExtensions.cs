@@ -10,7 +10,7 @@ namespace M5.BloomFilter
     /// <summary>
     /// BloomFilterExtensions
     /// </summary>
-    public static class BloomFilterExtensions
+    public static partial class BloomFilterExtensions
     {
         #region Byte
 
