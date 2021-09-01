@@ -7,7 +7,7 @@ using static Pineapple.Common.Preconditions;
 
 namespace M5.BloomFilter
 {
-    public class Filter : IBloomFilter, ISerializableBloomFilter
+    public class Filter : IBloomFilter
     {
         private readonly object _sync = new();
 
@@ -164,6 +164,11 @@ namespace M5.BloomFilter
         public int[] ComputeHash(byte[] data)
         {
             return Hash.ComputeHash(data, Statistics.M, Statistics.K);
+        }
+
+        public IImmutableBloomFilter ToImmutable()
+        {
+            return new ReadOnlyFilter(this);
         }
 
         public override string ToString()

@@ -16,17 +16,23 @@
 	<IncludeSymbols>true</IncludeSymbols>
 	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<RootNamespace>M5.BitArraySerialization.Json</RootNamespace>
+	<AssemblyName>M5.BitArraySerialization.Json</AssemblyName>
+	<PackageIconUrl />
+	<Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Pineapple" Version="1.0.35" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="bitarray_400-min.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+		<Pack>True</Pack>
+		<PackagePath></PackagePath>
+	</None>
   </ItemGroup>
+
+	<Import Project="..\M5.BitArraySerialization.Shared\M5.BitArraySerialization.Shared.projitems" Label="Shared" />
 
 </Project>

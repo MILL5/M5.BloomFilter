@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Serialization helpers for BitArray in .NET using Google Protocol Buffers</Description>
+    <Authors>MILL5</Authors>
+    <Version>1.0.2</Version>
+    <PackageProjectUrl>https://github.com/MILL5/M5.BloomFilter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MILL5/M5.BloomFilter</RepositoryUrl>
+    <PackageIcon>bitarray_400-min.png</PackageIcon>
+    <PackageIconUrl />
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>serialization;bit;array;google;protobuf;protocol;buffers</PackageTags>
+    <Copyright>Copyright © MILL5, LLC 2021</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pineapple" Version="1.0.35" />
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bitarray_400-min.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <Import Project="..\M5.BitArraySerialization.Shared\M5.BitArraySerialization.Shared.projitems" Label="Shared" />
+
+</Project>

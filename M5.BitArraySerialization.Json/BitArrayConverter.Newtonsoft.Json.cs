@@ -12,7 +12,6 @@ namespace Newtonsoft.Json
             if (dto == null)
                 return null;
             var bitArray = dto.AsBitArray();
-            bitArray.Length = dto.L;
             return bitArray;
         }
 

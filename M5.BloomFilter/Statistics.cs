@@ -92,6 +92,22 @@ namespace M5.BloomFilter
             P = BestP(K, M, N);
         }
 
+        public Statistics(int m, long n, short k, double p)
+        {
+            CheckIsNotLessThanOrEqualTo(nameof(m), m, 0);
+            CheckIsNotLessThanOrEqualTo(nameof(n), n, 0);
+            CheckIsNotLessThanOrEqualTo(nameof(k), k, 0);
+
+            if ((p <= 0) || (p >= 1))
+                throw new ArgumentOutOfRangeException(nameof(p), p, "p must be between 0 and 1.");
+
+            M = m;
+            N = n;
+            K = k;
+            P = p;
+        }
+
+
         /// <summary>
         /// Capacity of the Bloom Filter
         /// </summary>

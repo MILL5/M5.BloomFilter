@@ -7,6 +7,10 @@ namespace M5.BloomFilter
 {
     public interface IImmutableBloomFilter
     {
+        public BitArray HashBits { get; }
+        public HashFunction Hash { get; }
+        public Statistics Statistics { get; }
+
         bool Contains(byte[] element);
         Task<bool> ContainsAsync(byte[] element);
         ICollection<bool> Contains(IEnumerable<byte[]> elements);

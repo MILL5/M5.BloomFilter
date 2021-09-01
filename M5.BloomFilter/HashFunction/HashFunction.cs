@@ -8,29 +8,32 @@ namespace M5.BloomFilter
     {
         public readonly static IReadOnlyDictionary<HashMethod, HashFunction> Functions = new Dictionary<HashMethod, HashFunction>
         {
-            { HashMethod.LCGWithFNV1,new LCGWithFNV() },
-            { HashMethod.LCGWithFNV1a,new LCGWithFNV1a() },
-            { HashMethod.LCGModifiedFNV1,new LCGModifiedFNV1() },
+            { HashMethod.LCGWithFNV1, new LCGWithFNV() },
+            { HashMethod.LCGWithFNV1a, new LCGWithFNV1a() },
+            { HashMethod.LCGModifiedFNV1, new LCGModifiedFNV1() },
 
-            { HashMethod.RNGWithFNV1,new RNGWithFNV1() },
-            { HashMethod.RNGWithFNV1a,new RNGWithFNV1a() },
-            { HashMethod.RNGModifiedFNV1,new RNGModifiedFNV1() },
+            { HashMethod.RNGWithFNV1, new RNGWithFNV1() },
+            { HashMethod.RNGWithFNV1a, new RNGWithFNV1a() },
+            { HashMethod.RNGModifiedFNV1, new RNGModifiedFNV1() },
 
-            { HashMethod.CRC32,new HashChecksumCrc32() },
-            { HashMethod.CRC32u,new HashChecksumCrc32u() },
-            { HashMethod.Adler32,new HashChecksumAdler32() },
+            { HashMethod.CRC32, new HashChecksumCrc32() },
+            { HashMethod.CRC32u, new HashChecksumCrc32u() },
+            { HashMethod.Adler32, new HashChecksumAdler32() },
 
-            { HashMethod.Murmur2,new Murmur2() },
-            { HashMethod.Murmur3,new Murmur3() },
-            { HashMethod.Murmur3KirschMitzenmacher,new Murmur3KirschMitzenmacher() },
+            { HashMethod.Murmur2, new Murmur2() },
+            { HashMethod.Murmur3, new Murmur3() },
+            { HashMethod.Murmur3KirschMitzenmacher, new Murmur3KirschMitzenmacher() },
 
-            { HashMethod.SHA1,new HashCryptoSHA1() },
-            { HashMethod.SHA256,new HashCryptoSHA256() },
-            { HashMethod.SHA384,new HashCryptoSHA384() },
-            { HashMethod.SHA512,new HashCryptoSHA512() },
+            { HashMethod.SHA1, new HashCryptoSHA1() },
+            { HashMethod.SHA256, new HashCryptoSHA256() },
+            { HashMethod.SHA384, new HashCryptoSHA384() },
+            { HashMethod.SHA512, new HashCryptoSHA512() },
         };
 
-        private const int IntMax = 2147483647;
+        public static HashFunction GetHashFunction(HashMethod hashMethod)
+        {
+            return Functions.GetValueOrDefault(hashMethod);
+        }
 
         public abstract int[] ComputeHash(byte[] data, int m, int k);
 
@@ -42,7 +45,7 @@ namespace M5.BloomFilter
         protected int Rejection(int random, int m)
         {
             random = Math.Abs(random);
-            if (random > (IntMax - IntMax % m) || random == IntMax)
+            if (random > (int.MaxValue - int.MaxValue % m) || random == int.MaxValue)
                 return -1;
             return random % m;
         }

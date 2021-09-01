@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.IO.Compression;
+using static Pineapple.Common.Preconditions;
 
 namespace M5.BitArraySerialization.Json
 {
@@ -14,6 +15,8 @@ namespace M5.BitArraySerialization.Json
 
         public BitArrayDTO(BitArray ba)
         {
+            CheckIsNotNull(nameof(ba), ba);
+
             L = ba.Length;
             var value = ba.BitArrayToByteArray();
 

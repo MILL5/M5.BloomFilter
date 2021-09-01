@@ -7,22 +7,35 @@ using static Pineapple.Common.Preconditions;
 
 namespace M5.BloomFilter
 {
-    public class ReadOnlyFilter : IImmutableBloomFilter, ISerializableBloomFilter
+    public sealed class ReadOnlyFilter : IImmutableBloomFilter
     {
+        public ReadOnlyFilter(BitArray hashBits, HashMethod hashMethod, int m, long n, short k, double p)
+        {
+            CheckIsNotNull(nameof(hashBits), hashBits);
+
+            HashBits = hashBits;
+            Hash = HashFunction.GetHashFunction(hashMethod);
+
+            CheckIsNotNull(nameof(hashMethod), Hash);
+
+            Statistics = new Statistics(m, n, k, p);
+        }
+
         public ReadOnlyFilter(Filter filter)
         {
             CheckIsNotNull(nameof(filter), filter);
 
-            HashBits = filter.HashBits;
+            HashBits = filter.HashBits.Clone() as BitArray;
             Hash = filter.Hash;
             Statistics = filter.Statistics;
         }
 
         public BitArray HashBits { get; }
         public HashFunction Hash { get; }
+
         public Statistics Statistics { get; }
 
-        public virtual bool Contains(byte[] element)
+        public bool Contains(byte[] element)
         {
             var positions = ComputeHash(element);
 
@@ -35,12 +48,12 @@ namespace M5.BloomFilter
             return true;
         }
 
-        public virtual Task<bool> ContainsAsync(byte[] element)
+        public Task<bool> ContainsAsync(byte[] element)
         {
             return Task.FromResult(Contains(element));
         }
 
-        public virtual ICollection<bool> Contains(IEnumerable<byte[]> elements)
+        public ICollection<bool> Contains(IEnumerable<byte[]> elements)
         {
             var hashes = new List<int>();
             foreach (var element in elements)
@@ -74,17 +87,17 @@ namespace M5.BloomFilter
             return results;
         }
 
-        public virtual Task<ICollection<bool>> ContainsAsync(IEnumerable<byte[]> elements)
+        public Task<ICollection<bool>> ContainsAsync(IEnumerable<byte[]> elements)
         {
             return Task.FromResult(Contains(elements));
         }
 
-        public virtual bool All(IEnumerable<byte[]> elements)
+        public bool All(IEnumerable<byte[]> elements)
         {
             return Contains(elements).All(e => e);
         }
 
-        public virtual Task<bool> AllAsync(IEnumerable<byte[]> elements)
+        public Task<bool> AllAsync(IEnumerable<byte[]> elements)
         {
             return Task.FromResult(All(elements));
         }

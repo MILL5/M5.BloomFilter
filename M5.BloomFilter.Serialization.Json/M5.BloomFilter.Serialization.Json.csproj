@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>M5.BloomFilter.Serialization</RootNamespace>
+    <Version>1.0.2</Version>
+    <Authors>MILL5</Authors>
+    <Copyright>Copyright © MILL5, LLC 2021</Copyright>
+    <PackageProjectUrl>https://github.com/MILL5/M5.BloomFilter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MILL5/M5.BloomFilter</RepositoryUrl>
+    <PackageIcon>bitarray_400-min.png</PackageIcon>
+    <PackageIconUrl />
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>bloom;filter;set;hash;dictionary;map;json</PackageTags>
+    <Description>Help serialize bloom filters using JSON</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\M5.BloomFilter\M5.BloomFilter.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bitarray_400-min.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
