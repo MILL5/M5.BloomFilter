@@ -14,6 +14,8 @@
     <PackageTags>bloom;filter;set;hash;dictionary;map;google;protobuf;protocol;buffers</PackageTags>
     <Description>Help serialize bloom filters using Google Protocol Buffers</Description>
     <Copyright>Copyright © MILL5, LLC 2021</Copyright>
+    <IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>

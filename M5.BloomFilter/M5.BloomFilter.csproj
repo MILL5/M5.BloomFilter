@@ -10,6 +10,7 @@
     <PackageProjectUrl>https://github.com/MILL5/M5.BloomFilter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MILL5/M5.BloomFilter</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageIcon>bitarray_400-min.png</PackageIcon>
 	<IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	<PackageTags>bloom;filter;set;hash;dictionary;map</PackageTags>
@@ -30,5 +31,12 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Pineapple" Version="1.0.35" />
   </ItemGroup>
+
+	<ItemGroup>
+		<None Include="bitarray_400-min.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
 
 </Project>

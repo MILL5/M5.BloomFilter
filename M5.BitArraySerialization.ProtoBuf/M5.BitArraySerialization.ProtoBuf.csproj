@@ -14,6 +14,8 @@
     <PackageTags>serialization;bit;array;google;protobuf;protocol;buffers</PackageTags>
     <Copyright>Copyright © MILL5, LLC 2021</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,11 +25,11 @@
 
   <ItemGroup>
     <None Include="bitarray_400-min.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-
+		<Pack>True</Pack>
+		<PackagePath></PackagePath>
+	</None>
+  </ItemGroup>	
+	
   <Import Project="..\M5.BitArraySerialization.Shared\M5.BitArraySerialization.Shared.projitems" Label="Shared" />
 
 </Project>
