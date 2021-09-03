@@ -23,6 +23,8 @@ namespace M5.BloomFilter.Serialization
             if (hashMethod == HashMethod.Unknown)
                 throw new Exception("No hashmethod found.");
 
+            HashMethod = hashMethod;
+
             var s = bloomFilter.Statistics;
 
             M = s.M;

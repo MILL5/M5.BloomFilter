@@ -15,7 +15,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	<PackageTags>bloom;filter;set;hash;dictionary;map</PackageTags>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	<Version>1.0.6</Version>
+	<Version>1.0.7</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

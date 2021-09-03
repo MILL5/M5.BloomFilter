@@ -39,7 +39,7 @@ namespace M5.BitArraySerialization
         [ProtoMember(1, Name = "b")]
         public byte[] B { get; set; }
 
-        [ProtoMember(1, Name = "l")]
+        [ProtoMember(2, Name = "l")]
         public int L { get; set; }
 
         public static BitArray FromBitArray(System.Collections.BitArray bitArray)
