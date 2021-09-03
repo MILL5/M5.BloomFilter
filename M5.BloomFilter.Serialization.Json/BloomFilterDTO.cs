@@ -8,7 +8,11 @@ namespace M5.BloomFilter.Serialization
 {
     internal class BloomFilterDTO
     {
-        public BloomFilterDTO(IImmutableBloomFilter bloomFilter)
+        public BloomFilterDTO()
+        {
+        }
+
+        public BloomFilterDTO(ReadOnlyFilter bloomFilter)
         {
             CheckIsNotNull(nameof(bloomFilter), bloomFilter);
 
@@ -18,6 +22,8 @@ namespace M5.BloomFilter.Serialization
 
             if (hashMethod == HashMethod.Unknown)
                 throw new Exception("No hashmethod found.");
+
+            HashMethod = hashMethod;
 
             var s = bloomFilter.Statistics;
 
@@ -30,6 +36,7 @@ namespace M5.BloomFilter.Serialization
         [JsonProperty(PropertyName = "hb")]
         [JsonPropertyName(name:"hb")]
         public BitArray HashBits { get; set; }
+
         [JsonProperty(PropertyName = "hm")]
         [JsonPropertyName(name: "hm")]
         public HashMethod HashMethod { get; set; }
@@ -37,17 +44,20 @@ namespace M5.BloomFilter.Serialization
         [JsonProperty(PropertyName = "m")]
         [JsonPropertyName(name: "m")]
         public int M { get; set; }
+        
         [JsonProperty(PropertyName = "k")]
         [JsonPropertyName(name: "k")]
         public short K { get; set; }
+        
         [JsonProperty(PropertyName = "n")]
         [JsonPropertyName(name: "n")]
         public long N { get; set; }
+        
         [JsonProperty(PropertyName = "p")]
         [JsonPropertyName(name: "p")]
         public double P { get; set; }
 
-        public IImmutableBloomFilter AsBloomFilter()
+        public ReadOnlyFilter AsBloomFilter()
         {
             return new ReadOnlyFilter(HashBits, HashMethod, M, N, K, P);
         }

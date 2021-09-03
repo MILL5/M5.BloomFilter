@@ -34,7 +34,7 @@ namespace M5.BloomFilter.UnitTests
                     contains++;
             }
 
-            var f = test.Filter as Filter;
+            var f = test.Filter as BloomFilter;
 
             Console.WriteLine(f.HashBits.Count);
             contains.ShouldBe(3);

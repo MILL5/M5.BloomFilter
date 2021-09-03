@@ -5,9 +5,14 @@ using M5.BloomFilter.Serialization;
 
 namespace Newtonsoft.Json
 {
-    public class BloomFilterConverter : JsonConverter<IImmutableBloomFilter>
+    public class BloomFilterConverter : JsonConverter<ReadOnlyFilter>
     {
-        public override IImmutableBloomFilter ReadJson(JsonReader reader, Type objectType, IImmutableBloomFilter existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public BloomFilterConverter()
+        {
+            _ = new BitArrayConverter();
+        }
+
+        public override ReadOnlyFilter ReadJson(JsonReader reader, Type objectType, ReadOnlyFilter existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var dto = serializer.Deserialize<BloomFilterDTO>(reader);
             if (dto == null)
@@ -16,7 +21,7 @@ namespace Newtonsoft.Json
             return bloomFilter;
         }
 
-        public override void WriteJson(JsonWriter writer, IImmutableBloomFilter value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, ReadOnlyFilter value, JsonSerializer serializer)
         {
             var dto = new BloomFilterDTO(value);
             serializer.Serialize(writer, dto);

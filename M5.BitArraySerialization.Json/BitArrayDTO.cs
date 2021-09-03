@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.IO.Compression;
+using System.Text.Json.Serialization;
 using static Pineapple.Common.Preconditions;
 
 namespace M5.BitArraySerialization.Json
@@ -35,8 +37,12 @@ namespace M5.BitArraySerialization.Json
             }
         }
 
+        [JsonProperty(PropertyName = "b")]
+        [JsonPropertyName("b")]
         public byte[] B { get; set; }
 
+        [JsonProperty(PropertyName = "l")]
+        [JsonPropertyName("l")]
         public int L { get; set; }
 
         public BitArray AsBitArray()

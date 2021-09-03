@@ -32,7 +32,6 @@ namespace M5.BloomFilter
 
         public BitArray HashBits { get; }
         public HashFunction Hash { get; }
-
         public Statistics Statistics { get; }
 
         public bool Contains(byte[] element)

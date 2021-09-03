@@ -14,7 +14,7 @@ namespace M5.BloomFilter
             return Build(expectedElements, 0.01, hashMethod);
         }
 
-        public static IBloomFilter Build(int expectedElements, HashFunction hashFunction)
+        private static IBloomFilter Build(int expectedElements, HashFunction hashFunction)
         {
             return Build(expectedElements, 0.01, hashFunction);
         }
@@ -26,12 +26,12 @@ namespace M5.BloomFilter
 
         public static IBloomFilter Build(int expectedElements, double errorRate, HashMethod hashMethod)
         {
-            return new Filter(expectedElements, errorRate, HashFunction.Functions[hashMethod]);
+            return new BloomFilter(expectedElements, errorRate, HashFunction.Functions[hashMethod]);
         }
 
-        public static IBloomFilter Build(int expectedElements, double errorRate, HashFunction hashFunction)
+        private static IBloomFilter Build(int expectedElements, double errorRate, HashFunction hashFunction)
         {
-            return new Filter(expectedElements, errorRate, hashFunction);
+            return new BloomFilter(expectedElements, errorRate, hashFunction);
         }
     }
 }

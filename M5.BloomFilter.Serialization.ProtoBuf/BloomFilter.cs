@@ -46,7 +46,7 @@ namespace M5.BloomFilter.Serialization
         [ProtoMember(6, Name = "p")]
         public double P { get; set; }
 
-        public IImmutableBloomFilter AsBloomFilter()
+        public ReadOnlyFilter AsBloomFilter()
         {
             return new ReadOnlyFilter(HashBits.AsBitArray(), HashMethod, M, N, K, P);
         }

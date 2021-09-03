@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "M5.BitArraySerialization.Pr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "M5.BitArraySerialization.ProtoBuf.UnitTests", "M5.BitArraySerialization.ProtoBuf.UnitTests\M5.BitArraySerialization.ProtoBuf.UnitTests.csproj", "{671E4A5B-1030-4973-B4F4-A27440735E97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M5.BloomFilter.Serialization.ProtoBuf", "M5.BloomFilter.Serialization.ProtoBuf\M5.BloomFilter.Serialization.ProtoBuf.csproj", "{7EE65EA1-87E5-4804-81CC-BC9D0C7A1C7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "M5.BloomFilter.Serialization.ProtoBuf", "M5.BloomFilter.Serialization.ProtoBuf\M5.BloomFilter.Serialization.ProtoBuf.csproj", "{7EE65EA1-87E5-4804-81CC-BC9D0C7A1C7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M5.BloomFilter.Serialization.UnitTests", "M5.BloomFilter.Serialization.UnitTests\M5.BloomFilter.Serialization.UnitTests.csproj", "{2A3F75F3-36BF-45D7-9C87-75B8195AA203}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -68,6 +70,10 @@ Global
 		{7EE65EA1-87E5-4804-81CC-BC9D0C7A1C7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EE65EA1-87E5-4804-81CC-BC9D0C7A1C7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7EE65EA1-87E5-4804-81CC-BC9D0C7A1C7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A3F75F3-36BF-45D7-9C87-75B8195AA203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A3F75F3-36BF-45D7-9C87-75B8195AA203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A3F75F3-36BF-45D7-9C87-75B8195AA203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A3F75F3-36BF-45D7-9C87-75B8195AA203}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,6 +86,7 @@ Global
 		{946B671C-D71E-4384-92FE-BCEA01F74605} = {A375395C-8A5A-4504-BD2B-E468D07AC0F3}
 		{671E4A5B-1030-4973-B4F4-A27440735E97} = {A375395C-8A5A-4504-BD2B-E468D07AC0F3}
 		{7EE65EA1-87E5-4804-81CC-BC9D0C7A1C7C} = {C99DF9E5-BFDB-4322-ABE1-B50EF8C3239A}
+		{2A3F75F3-36BF-45D7-9C87-75B8195AA203} = {C99DF9E5-BFDB-4322-ABE1-B50EF8C3239A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E4E9E293-9B4A-4C3D-882E-D169524649E1}

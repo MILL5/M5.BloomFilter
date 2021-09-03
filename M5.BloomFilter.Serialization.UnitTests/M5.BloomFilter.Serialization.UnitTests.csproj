@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.6" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.6" />
+    <PackageReference Include="coverlet.collector" Version="3.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\M5.BloomFilter.Serialization.Json\M5.BloomFilter.Serialization.Json.csproj" />
+    <ProjectReference Include="..\M5.BloomFilter.Serialization.ProtoBuf\M5.BloomFilter.Serialization.ProtoBuf.csproj" />
+    <ProjectReference Include="..\M5.BloomFilter\M5.BloomFilter.csproj" />
+  </ItemGroup>
+
+</Project>

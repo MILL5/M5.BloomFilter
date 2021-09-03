@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Serialization helpers for BitArray in .NET using Google Protocol Buffers</Description>
     <Authors>MILL5</Authors>
-    <Version>1.0.3</Version>
+    <Version>1.0.6</Version>
     <PackageProjectUrl>https://github.com/MILL5/M5.BloomFilter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MILL5/M5.BloomFilter</RepositoryUrl>
     <PackageIcon>bitarray_400-min.png</PackageIcon>

@@ -7,8 +7,14 @@ namespace M5.BloomFilter
 {
     public interface IImmutableBloomFilter
     {
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public BitArray HashBits { get; }
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public HashFunction Hash { get; }
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public Statistics Statistics { get; }
 
         bool Contains(byte[] element);

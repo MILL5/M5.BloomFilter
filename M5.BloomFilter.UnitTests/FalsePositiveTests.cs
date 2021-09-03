@@ -48,7 +48,7 @@ namespace M5.BloomFilter.UnitTests
 
             var test = new BloomIntTest(hashMethod, _items, expectedElements : ExpectedResults, errorRate : ErrorRate);
 
-            var s = (test.Filter as Filter).Statistics;
+            var s = (test.Filter as BloomFilter).Statistics;
 
             Console.WriteLine($"M={s.M}");
             Console.WriteLine($"K={s.K}");
