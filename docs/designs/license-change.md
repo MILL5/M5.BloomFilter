@@ -12,9 +12,8 @@ all internal dependency versions advance together. Hash format remains 2.
 
 README, site copy, FAQ structured data, discovery metadata and installation
 commands identify the new version and source-available license. Third-party
-Google EGM Apache and Barlow OFL licenses remain untouched. File Exchange,
-FinOps and VideoTranscribe are separate proprietary products, not license
-precedents for BloomFilter's selected terms.
+Google EGM Apache and Barlow OFL licenses remain untouched. Separate proprietary
+MILL5 product terms were not selected for BloomFilter.
 
 Validation: compare the standard body byte-for-byte with the source template,
 inspect all five packaged license files and nuspec metadata, run the existing
