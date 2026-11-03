@@ -9,3 +9,4 @@
 - EGM artifact directory: docs/designs
 - Keep project agent guidance in AGENTS.md only. Never rebase, add AI commit attribution, or manually request PR reviews.
 - GitHub Pages must use verified MILL5 and Richard Crane MVP branding, accurate technical copy, accessible HTML, and maintained search/answer metadata.
+- License: PolyForm Strict 1.0.0 for MILL5-owned work; preserve third-party licenses and historical release terms. Describe this release as source-available.

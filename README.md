@@ -16,10 +16,10 @@ are allowed. There is no delete operation.
 This repository targets .NET 10 and pins SDK 10.0.403 in `global.json`.
 Version 2.0.0 introduces breaking changes; 1.x packages use the older .NET 5
 implementation. Rebuild persisted filters before upgrading. Install the current
-[NuGet package](https://www.nuget.org/packages/M5.BloomFilter/2.0.0):
+[NuGet package](https://www.nuget.org/packages/M5.BloomFilter/2.0.1):
 
 ```sh
-dotnet add package M5.BloomFilter --version 2.0.0
+dotnet add package M5.BloomFilter --version 2.0.1
 ```
 
 ```csharp
@@ -92,4 +92,14 @@ GitHub Actions tests the solution on Linux and Windows and deploys only `docs/si
 to GitHub Pages. Design/review artifacts are excluded from the website deployment.
 Package release steps are in [the release guide](docs/releasing.md).
 
-[Apache-2.0 license](LICENSE).
+## License
+
+Version 2.0.1 adopts [PolyForm Strict 1.0.0](LICENSE), with copyright retained by
+MILL5, LLC. This is source-available software; the license permits the uses it
+expressly describes. Uses outside those terms require separate authorization
+from MILL5. Read the full license before using the software.
+
+The license change does not alter version 2 hashing, stored payloads, APIs, or
+.NET requirements. Version 2.0.0 and earlier distributions retain their original
+Apache-2.0 license. Bundled third-party materials retain their own licenses;
+see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
