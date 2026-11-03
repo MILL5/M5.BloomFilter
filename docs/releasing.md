@@ -38,8 +38,10 @@ or email). For trusted publishing, configure owner MILL5, repository M5.BloomFil
 workflow release.yml, no environment. Configure permission for all five package
 IDs. No publishing credentials belong in this repository or chat.
 
-At preparation time this repository had no publishing secret/variable and no
-local NuGet key. Authentication must be configured before publication can succeed.
+Trusted publishing is configured as `NUGET_BLOOMFILTER`, owned by MILL5 and
+restricted to this repository, `release.yml`, and the five package IDs above.
+Repository variable `NUGET_USER` selects the `richcrane` NuGet profile. The workflow
+exchanges GitHub OIDC for a short-lived publishing key; no permanent key is stored.
 
 ## Publication
 

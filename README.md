@@ -14,9 +14,13 @@ are allowed. There is no delete operation.
 ## Get started
 
 This repository targets .NET 10 and pins SDK 10.0.403 in `global.json`.
-The version 2.0.0 source introduces breaking changes; previously published 1.x
-packages use the older .NET 5 implementation. Check the
-[NuGet package](https://www.nuget.org/packages/M5.BloomFilter) for publication status.
+Version 2.0.0 introduces breaking changes; 1.x packages use the older .NET 5
+implementation. Rebuild persisted filters before upgrading. Install the current
+[NuGet package](https://www.nuget.org/packages/M5.BloomFilter/2.0.0):
+
+```sh
+dotnet add package M5.BloomFilter --version 2.0.0
+```
 
 ```csharp
 using M5.BloomFilter;
