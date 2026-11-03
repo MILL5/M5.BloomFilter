@@ -16,7 +16,7 @@ img{max-width:100%;height:auto}
 .wrap{width:min(var(--max),calc(100% - 72px));margin-inline:auto}
 .skip{position:absolute;left:20px;top:-90px;background:#fff;padding:12px;z-index:5}
 .skip:focus{top:8px}
-.site-header{display:flex;align-items:center;gap:24px;padding-block:29px;border-bottom:1px solid var(--line)}
+.site-header{display:flex;align-items:baseline;gap:24px;padding-block:29px;border-bottom:1px solid var(--line)}
 .company{display:flex}
 .company img{width:132px}
 .product{border-left:1px solid var(--line);padding-left:24px;text-decoration:none;font-weight:650;color:var(--ink)}
