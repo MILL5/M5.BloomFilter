@@ -49,30 +49,7 @@ namespace M5.BitArraySerialization
 
         public System.Collections.BitArray AsBitArray()
         {
-            if (L == 0)
-                return new System.Collections.BitArray(0);
-
-            byte[] bytes;
-            
-            if (L >= CompressLength)
-            {
-                var ros = new ReadOnlySpan<byte>(B);
-                var s = new Span<byte>(new byte[L.ByteArrayLength()]);
-
-                if (!BrotliDecoder.TryDecompress(ros, s, out int bytesWritten))
-                    throw new Exception("Unable to decompress.");
-
-                bytes = s.Slice(0, bytesWritten).ToArray();
-            }
-            else
-            {
-                bytes = B;
-            }
-
-            return new System.Collections.BitArray(bytes)
-            {
-                Length = L
-            };
+            return BitArrayExtensions.DecodeBits(B, L);
         }
     }
 }

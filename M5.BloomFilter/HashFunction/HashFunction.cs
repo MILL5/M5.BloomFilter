@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace M5.BloomFilter
 {
     public abstract class HashFunction
     {
-        public readonly static IReadOnlyDictionary<HashMethod, HashFunction> Functions = new Dictionary<HashMethod, HashFunction>
+        public readonly static IReadOnlyDictionary<HashMethod, HashFunction> Functions = new ReadOnlyDictionary<HashMethod, HashFunction>(new Dictionary<HashMethod, HashFunction>
         {
             { HashMethod.LCGWithFNV1, new LCGWithFNV() },
             { HashMethod.LCGWithFNV1a, new LCGWithFNV1a() },
@@ -28,7 +29,7 @@ namespace M5.BloomFilter
             { HashMethod.SHA256, new HashCryptoSHA256() },
             { HashMethod.SHA384, new HashCryptoSHA384() },
             { HashMethod.SHA512, new HashCryptoSHA512() },
-        };
+        });
 
         public static HashFunction GetHashFunction(HashMethod hashMethod)
         {
@@ -37,17 +38,33 @@ namespace M5.BloomFilter
 
         public abstract int[] ComputeHash(byte[] data, int m, int k);
 
-        protected int Rejection(uint random, int m)
+        protected static void Validate(byte[] data, int m, int k)
         {
-            return Rejection((int)random, m);
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (m <= 0) throw new ArgumentOutOfRangeException(nameof(m));
+            if (k <= 0) throw new ArgumentOutOfRangeException(nameof(k));
         }
 
-        protected int Rejection(int random, int m)
+        protected int Rejection(uint random, int m)
         {
-            random = Math.Abs(random);
-            if (random > (int.MaxValue - int.MaxValue % m) || random == int.MaxValue)
-                return -1;
-            return random % m;
+            if (m <= 0) throw new ArgumentOutOfRangeException(nameof(m));
+            ulong range = 1UL << 32;
+            return random >= range - range % (uint)m ? -1 : (int)(random % (uint)m);
+        }
+
+        protected int Rejection(int random, int m) => Rejection(unchecked((uint)random), m);
+
+        // Murmur3's 32-bit final avalanche; all arithmetic wraps modulo 2^32.
+        protected static uint Mix(uint value)
+        {
+            unchecked
+            {
+                value ^= value >> 16;
+                value *= 0x85ebca6b;
+                value ^= value >> 13;
+                value *= 0xc2b2ae35;
+                return value ^ (value >> 16);
+            }
         }
 
         public static uint NumberOfTrailingZeros(uint i)
@@ -125,18 +142,7 @@ namespace M5.BloomFilter
             return value;
         }
 
-        public static long RightMove(long value, int pos)
-        {
-            if (pos != 0)
-            {
-                var mask = 0x7fffffff;
-                value >>= 1;
-                value &= mask;
-                value >>= pos - 1;
-            }
-
-            return value;
-        }
+        public static long RightMove(long value, int pos) => (long)((ulong)value >> pos);
 
         public static uint RightMove(uint value, int pos)
         {

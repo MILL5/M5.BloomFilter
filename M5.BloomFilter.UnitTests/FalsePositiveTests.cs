@@ -40,7 +40,7 @@ namespace M5.BloomFilter.UnitTests
         [DataRow(HashMethod.SHA256)]
         [DataRow(HashMethod.SHA384)]
         [DataRow(HashMethod.SHA512)]
-        [DataTestMethod]
+        [TestMethod]
         public void TenPercent(HashMethod hashMethod)
         {
             const int ExpectedResults = 1000;

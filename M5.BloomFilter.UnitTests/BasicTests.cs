@@ -19,7 +19,7 @@ namespace M5.BloomFilter.UnitTests
         [DataRow(HashMethod.SHA256)]
         [DataRow(HashMethod.SHA384)]
         [DataRow(HashMethod.SHA512)]
-        [DataTestMethod]
+        [TestMethod]
         public void SimpleTest(HashMethod hashMethod)
         {
             const int ExpectedResults = 1000;
@@ -37,7 +37,8 @@ namespace M5.BloomFilter.UnitTests
             var f = test.Filter as BloomFilter;
 
             Console.WriteLine(f.HashBits.Count);
-            contains.ShouldBe(3);
+            test.Filter.All(new[] { 250, 500, 750 }).ShouldBeTrue();
+            contains.ShouldBeGreaterThanOrEqualTo(3);
         }
     }
 }

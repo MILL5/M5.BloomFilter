@@ -12,7 +12,7 @@ namespace M5.BloomFilter.Serialization
         {
         }
 
-        public BloomFilter(IBloomFilter bloomFilter)
+        public BloomFilter(IImmutableBloomFilter bloomFilter)
         {
             CheckIsNotNull(nameof(bloomFilter), bloomFilter);
 
@@ -31,6 +31,7 @@ namespace M5.BloomFilter.Serialization
             K = s.K;
             N = s.N;
             P = s.P;
+            FormatVersion = ReadOnlyFilter.CurrentFormatVersion;
         }
 
         [ProtoMember(1, Name = "hb")]
@@ -48,9 +49,15 @@ namespace M5.BloomFilter.Serialization
         [ProtoMember(6, Name = "p")]
         public double P { get; set; }
 
+        [ProtoMember(7, Name = "v")]
+        public int FormatVersion { get; set; }
+
         public ReadOnlyFilter AsBloomFilter()
         {
-            return new ReadOnlyFilter(HashBits.AsBitArray(), HashMethod, M, N, K, P);
+            if (FormatVersion != ReadOnlyFilter.CurrentFormatVersion)
+                throw new NotSupportedException("Unsupported Bloom filter format. Rebuild the filter from original keys with format version 2.");
+            if (HashBits == null) throw new FormatException("Bloom filter bit data is missing.");
+            return new ReadOnlyFilter(HashBits.AsBitArray(), HashMethod, M, N, K, P, FormatVersion);
         }
     }
 }

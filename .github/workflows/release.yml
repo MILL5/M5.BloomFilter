@@ -1,0 +1,61 @@
+name: Publish NuGet
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuget-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      NUGET_USER: ${{ vars.NUGET_USER }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: global.json
+      - name: Restore and audit
+        run: dotnet restore M5.BloomFilter.slnx -p:NuGetAuditMode=all -warnaserror:NU1901,NU1902,NU1903,NU1904
+      - name: Test release
+        run: dotnet test M5.BloomFilter.slnx -c Release --no-restore --blame-hang-timeout 60s
+      - name: Pack release
+        run: dotnet pack M5.BloomFilter.slnx -c Release --no-build --no-restore -o artifacts/packages
+      - name: Preserve release packages
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nuget-packages
+          path: artifacts/packages/*.*nupkg
+          if-no-files-found: error
+      - name: Verify publishing credentials
+        shell: bash
+        run: |
+          if [[ -z "$NUGET_API_KEY" && -z "$NUGET_USER" ]]; then
+            echo '::error::Configure NUGET_API_KEY secret, or NUGET_USER variable and a NuGet Trusted Publishing policy for release.yml.'
+            exit 1
+          fi
+      - name: NuGet login using trusted publishing
+        if: env.NUGET_API_KEY == '' && env.NUGET_USER != ''
+        id: login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
+        with:
+          user: ${{ env.NUGET_USER }}
+      - name: Publish all five packages and symbols
+        shell: bash
+        env:
+          OIDC_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          publish_key="${NUGET_API_KEY:-$OIDC_API_KEY}"
+          dotnet nuget push 'artifacts/packages/*.nupkg' --api-key "$publish_key" --source https://api.nuget.org/v3/index.json --skip-duplicate

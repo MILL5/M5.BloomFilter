@@ -10,12 +10,13 @@ namespace M5.BloomFilter
     internal class BloomFilter : IBloomFilter
     {
         private readonly object _sync = new();
+        private readonly BitArray _hashBits;
 
         public BloomFilter(long expectedElements, double errorRate, HashFunction hashFunction)
         {
             CheckIsNotLessThanOrEqualTo(nameof(expectedElements), expectedElements, 0);
 
-            if (errorRate >= 1 || errorRate <= 0)
+            if (!double.IsFinite(errorRate) || errorRate >= 1 || errorRate <= 0)
                 throw new ArgumentOutOfRangeException(nameof(errorRate), errorRate, $"errorRate must be between 0 and 1, exclusive. Was {errorRate}");
 
             CheckIsNotNull(nameof(HashFunction), hashFunction);
@@ -24,7 +25,7 @@ namespace M5.BloomFilter
 
             Statistics = new Statistics(expectedElements, errorRate);
 
-            HashBits = new BitArray(Statistics.M);
+            _hashBits = new BitArray(Statistics.M);
         }
 
         public BloomFilter(int capacity, short hashes, HashFunction hashFunction)
@@ -37,10 +38,10 @@ namespace M5.BloomFilter
 
             Statistics = new Statistics(capacity, hashes);
 
-            HashBits = new BitArray(Statistics.M);
+            _hashBits = new BitArray(Statistics.M);
         }
 
-        public BitArray HashBits { get; }
+        public BitArray HashBits { get { lock (_sync) return new BitArray(_hashBits); } }
 
         public HashFunction Hash { get; }
 
@@ -54,7 +55,7 @@ namespace M5.BloomFilter
             {
                 foreach (int position in positions)
                 {
-                    HashBits.Set(position, true);
+                    _hashBits.Set(position, true);
                 }
             }
         }
@@ -67,6 +68,7 @@ namespace M5.BloomFilter
 
         public virtual void Add(IEnumerable<byte[]> elements)
         {
+            ArgumentNullException.ThrowIfNull(elements);
             var hashes = new List<int>();
 
             foreach (var element in elements)
@@ -78,7 +80,7 @@ namespace M5.BloomFilter
             {
                 for (var i = 0; i < hashes.Count; i++)
                 {
-                    HashBits.Set(hashes[i], true);
+                    _hashBits.Set(hashes[i], true);
                 }
             }
         }
@@ -97,7 +99,7 @@ namespace M5.BloomFilter
             {
                 foreach (int position in positions)
                 {
-                    if (!HashBits.Get(position))
+                    if (!_hashBits.Get(position))
                         return false;
                 }
             }
@@ -112,6 +114,7 @@ namespace M5.BloomFilter
 
         public virtual ICollection<bool> Contains(IEnumerable<byte[]> elements)
         {
+            ArgumentNullException.ThrowIfNull(elements);
             var hashes = new List<int>();
             foreach (var element in elements)
             {
@@ -123,7 +126,7 @@ namespace M5.BloomFilter
             {
                 for (var i = 0; i < hashes.Count; i++)
                 {
-                    processResults[i] = HashBits.Get(hashes[i]);
+                    processResults[i] = _hashBits.Get(hashes[i]);
                 }
             }
 
@@ -163,6 +166,7 @@ namespace M5.BloomFilter
 
         public int[] ComputeHash(byte[] data)
         {
+            ArgumentNullException.ThrowIfNull(data);
             return Hash.ComputeHash(data, Statistics.M, Statistics.K);
         }
 

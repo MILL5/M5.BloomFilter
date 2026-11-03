@@ -1,128 +1,94 @@
 ﻿using System;
-using static Pineapple.Common.Preconditions;
 
 namespace M5.BloomFilter
 {
+    /// <summary>Design capacity and the ideal independent-hash false-positive estimate.</summary>
     public class Statistics
     {
-        private static int MaxInt(double value)
+        private static void Positive(long value, string name)
         {
-            return (int)Math.Min(value, int.MaxValue);
+            if (value <= 0) throw new ArgumentOutOfRangeException(name);
         }
 
-        private static long MaxLong(double value)
+        private static void Probability(double value, string name)
         {
-            return (long)Math.Min(value, long.MaxValue);
+            if (!double.IsFinite(value) || value <= 0 || value >= 1)
+                throw new ArgumentOutOfRangeException(name, "Probability must be finite and strictly between zero and one.");
         }
 
-        private static short MaxShort(double value)
-        {
-            return (short)Math.Min(value, short.MaxValue);
-        }
-
-        private static int BestM(long n, double p)
-        {
-            return MaxInt(Math.Ceiling(-1 * (n * Math.Log(p)) / Math.Pow(Math.Log(2), 2)));
-        }
+        private static double BestP(short k, int m, long n)
+            => Math.Pow(1 - Math.Exp(-(double)k * n / m), k);
 
         private static short BestK(long n, int m)
         {
-            return MaxShort(Math.Ceiling(Math.Log(2) * m / n));
+            double ideal = Math.Log(2) * m / n;
+            short lower = (short)Math.Clamp(Math.Floor(ideal), 1, short.MaxValue);
+            short upper = (short)Math.Clamp(Math.Ceiling(ideal), 1, short.MaxValue);
+            return BestP(lower, m, n) <= BestP(upper, m, n) ? lower : upper;
         }
 
-        private static long BestN(int k, int m)
-        {
-            return MaxLong(Math.Ceiling(Math.Log(2) * m / k));
-        }
-
-        private static double BestP(short k, long m, long insertedElements)
-        {
-            return Math.Pow(1 - Math.Exp(-k * insertedElements * 1.0 / (m * 1.0)), k * 1.0);
-        }
-
-        /// <summary>
-        /// Use if you know the size of the Bloom Filter and number of hash functions
-        /// </summary>
-        /// <param name="m">The number of bits in the Bloom Filter</param>
-        /// <param name="k">The number of hash functions in the Bloom Filter</param>
         public Statistics(int m, short k)
         {
-            CheckIsNotLessThanOrEqualTo(nameof(m), m, 0);
-            CheckIsNotLessThanOrEqualTo(nameof(k), k, 0);
-
+            Positive(m, nameof(m));
+            Positive(k, nameof(k));
             M = m;
             K = k;
-            N = BestN(k, m);
+            N = Math.Max(1, (long)Math.Floor(Math.Log(2) * m / k));
             P = BestP(K, M, N);
         }
 
-        /// <summary>
-        /// Use if you know the size of the Bloom Filter and approximate number of items 
-        /// </summary>
-        /// <param name="m">The number of bits in the Bloom Filter</param>
-        /// <param name="n">The number of expected items stored in the set</param>
         public Statistics(int m, long n)
         {
-            CheckIsNotLessThanOrEqualTo(nameof(m), m, 0);
-            CheckIsNotLessThanOrEqualTo(nameof(n), n, 0);
-
+            Positive(m, nameof(m));
+            Positive(n, nameof(n));
             M = m;
             N = n;
-            K = BestK(N, M);
+            K = BestK(n, m);
             P = BestP(K, M, N);
         }
 
-        /// <summary>
-        /// Use if you know the approximate number of items and probability
-        /// </summary>
-        /// <param name="n">The number of expected items stored in the set</param>
-        /// <param name="p">The desired probability of false positives</param>
         public Statistics(long n, double p)
         {
-            CheckIsNotLessThanOrEqualTo(nameof(n), n, 0);
-
-            if ((p <= 0) || (p >= 1))
-                throw new ArgumentOutOfRangeException(nameof(p), p, "p must be between 0 and 1.");
- 
-            CheckIsNotLessThanOrEqualTo(nameof(n), n, 0);
-
+            Positive(n, nameof(n));
+            Probability(p, nameof(p));
+            double bits = Math.Ceiling(-n * Math.Log(p) / (Math.Log(2) * Math.Log(2)));
+            M = CheckedBits(bits);
             N = n;
-            M = BestM(N, p);
-            K = BestK(N, M);
+            K = BestK(n, M);
+            // Integer k can need a few more bits than the continuous optimum.
+            if (BestP(K, M, n) > p)
+            {
+                bits = Math.Ceiling(-(double)K * n / Math.Log(1 - Math.Pow(p, 1.0 / K)));
+                M = CheckedBits(Math.Max(M, bits));
+                K = BestK(n, M);
+            }
             P = BestP(K, M, N);
+        }
+
+        private static int CheckedBits(double bits)
+        {
+            if (!double.IsFinite(bits) || bits > int.MaxValue)
+                throw new ArgumentOutOfRangeException("n", "Requested filter exceeds Int32 bit capacity.");
+            return Math.Max(1, (int)bits);
         }
 
         public Statistics(int m, long n, short k, double p)
         {
-            CheckIsNotLessThanOrEqualTo(nameof(m), m, 0);
-            CheckIsNotLessThanOrEqualTo(nameof(n), n, 0);
-            CheckIsNotLessThanOrEqualTo(nameof(k), k, 0);
-
-            if ((p <= 0) || (p >= 1))
-                throw new ArgumentOutOfRangeException(nameof(p), p, "p must be between 0 and 1.");
-
+            Positive(m, nameof(m));
+            Positive(n, nameof(n));
+            Positive(k, nameof(k));
+            // An estimate can underflow to zero or round to one at extreme load.
+            if (!double.IsFinite(p) || p < 0 || p > 1)
+                throw new ArgumentOutOfRangeException(nameof(p));
             M = m;
             N = n;
             K = k;
             P = p;
         }
 
-
-        /// <summary>
-        /// Capacity of the Bloom Filter
-        /// </summary>
         public int M { get; }
-        /// <summary>
-        /// Number of Hash Functions of the Bloom Filter
-        /// </summary>
         public short K { get; }
-        /// <summary>
-        /// Expected nuber of items in the Bloom Filter
-        /// </summary>
         public long N { get; }
-        /// <summary>
-        /// Probability for a false positive from the Bloom Filter (i.e., error rate)
-        /// </summary>
         public double P { get; }
     }
 }

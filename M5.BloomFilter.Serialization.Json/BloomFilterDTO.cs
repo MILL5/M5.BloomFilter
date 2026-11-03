@@ -12,7 +12,7 @@ namespace M5.BloomFilter.Serialization
         {
         }
 
-        public BloomFilterDTO(ReadOnlyFilter bloomFilter)
+        public BloomFilterDTO(IImmutableBloomFilter bloomFilter)
         {
             CheckIsNotNull(nameof(bloomFilter), bloomFilter);
 
@@ -31,10 +31,13 @@ namespace M5.BloomFilter.Serialization
             K = s.K;
             N = s.N;
             P = s.P;
+            FormatVersion = ReadOnlyFilter.CurrentFormatVersion;
         }
 
         [JsonProperty(PropertyName = "hb")]
         [JsonPropertyName(name:"hb")]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.BitArrayConverter))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.BitArrayConverter))]
         public BitArray HashBits { get; set; }
 
         [JsonProperty(PropertyName = "hm")]
@@ -57,9 +60,13 @@ namespace M5.BloomFilter.Serialization
         [JsonPropertyName(name: "p")]
         public double P { get; set; }
 
+        [JsonProperty(PropertyName = "v")]
+        [JsonPropertyName("v")]
+        public int FormatVersion { get; set; }
+
         public ReadOnlyFilter AsBloomFilter()
         {
-            return new ReadOnlyFilter(HashBits, HashMethod, M, N, K, P);
+            return new ReadOnlyFilter(HashBits, HashMethod, M, N, K, P, FormatVersion);
         }
     }
 }

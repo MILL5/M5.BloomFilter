@@ -47,27 +47,7 @@ namespace M5.BitArraySerialization.Json
 
         public BitArray AsBitArray()
         {
-            byte[] bytes;
-            
-            if (L >= CompressLength)
-            {
-                var ros = new ReadOnlySpan<byte>(B);
-                var s = new Span<byte>(new byte[L.ByteArrayLength()]);
-
-                if (!BrotliDecoder.TryDecompress(ros, s, out int bytesWritten))
-                    throw new Exception("Unable to decompress.");
-
-                bytes = s.Slice(0, bytesWritten).ToArray();
-            }
-            else
-            {
-                bytes = B;
-            }
-
-            return new BitArray(bytes)
-            {
-                Length = L
-            };
+            return BitArrayExtensions.DecodeBits(B, L);
         }
     }
 }

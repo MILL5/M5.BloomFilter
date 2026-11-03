@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 
 namespace M5.BloomFilter
 {
@@ -38,22 +39,22 @@ namespace M5.BloomFilter
                 throw new ArgumentNullException(nameof(checksum));
             }
 
+            Validate(data, m, k);
+            // Checksums alone have structured collisions (especially Adler32).
+            // Independently discriminate the complete key before deriving positions.
+            uint discriminator = 2166136261;
+            foreach (byte value in data)
+                discriminator = unchecked((discriminator ^ value) * 16777619);
             int[] positions = new int[k];
-            int hashes = 0;
-            int salt = 0;
-
-            const int seed32 = 89478583;
-
-            while (hashes < k)
+            var counter = new byte[4];
+            for (int i = 0; i < k; i++)
             {
                 checksum.Reset();
                 checksum.Update(data);
-                checksum.Update(hashes + salt++ + seed32);
-                int hash = Rejection((int)checksum.Value, m);
-                if (hash != -1)
-                {
-                    positions[hashes++] = hash;
-                }
+                BinaryPrimitives.WriteUInt32LittleEndian(counter, (uint)i);
+                checksum.Update(counter);
+                uint hash = Mix(unchecked(((uint)checksum.Value ^ discriminator) + 0x9e3779b9U * ((uint)i + 1)));
+                positions[i] = (int)(hash % (uint)m);
             }
             return positions;
         }

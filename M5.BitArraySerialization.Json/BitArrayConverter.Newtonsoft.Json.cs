@@ -17,6 +17,7 @@ namespace Newtonsoft.Json
 
         public override void WriteJson(JsonWriter writer, BitArray value, JsonSerializer serializer)
         {
+            if (value == null) { writer.WriteNull(); return; }
             var dto = new BitArrayDTO(value);
             serializer.Serialize(writer, dto);
         }

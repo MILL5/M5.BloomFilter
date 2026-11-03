@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 
 namespace M5.BloomFilter
@@ -44,39 +45,19 @@ namespace M5.BloomFilter
     {
         protected int[] ComputeHash(HashAlgorithm hashAlgorithm, byte[] data, int m, int k)
         {
+            Validate(data, m, k);
             int[] positions = new int[k];
-
-            int computedHashes = 0;
-
-            byte[] digest = new byte[0];
-            byte[] output = new byte[hashAlgorithm.HashSize / 8];
-
-            while (computedHashes < k)
+            var input = new byte[checked(data.Length + 4)];
+            Buffer.BlockCopy(data, 0, input, 0, data.Length);
+            int computed = 0;
+            uint block = 0;
+            while (computed < k)
             {
-                hashAlgorithm.TransformBlock(digest, 0, digest.Length, output, 0);
-                digest = hashAlgorithm.ComputeHash(data, 0, data.Length);
-
-                BitArray hashed = new BitArray(digest);
-
-                int filterSize = 32 - (int)NumberOfLeadingZeros((uint)m);
-
-                int hashBits = digest.Length * 8;
-
-                for (int split = 0; split < (hashBits / filterSize) && computedHashes < k; split++)
-                {
-                    int from = split * filterSize;
-                    int to = ((split + 1) * filterSize);
-
-                    int intHash = BitToIntOne(hashed, from, to);
-
-                    if (intHash < m)
-                    {
-                        positions[computedHashes] = intHash;
-                        computedHashes++;
-                    }
-                }
+                BinaryPrimitives.WriteUInt32LittleEndian(input.AsSpan(data.Length), block++);
+                var digest = hashAlgorithm.ComputeHash(input);
+                for (int offset = 0; offset + 4 <= digest.Length && computed < k; offset += 4)
+                    positions[computed++] = (int)(BinaryPrimitives.ReadUInt32LittleEndian(digest.AsSpan(offset, 4)) % (uint)m);
             }
-
             return positions;
         }
     }
