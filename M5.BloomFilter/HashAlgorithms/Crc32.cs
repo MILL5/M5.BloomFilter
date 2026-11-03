@@ -110,7 +110,7 @@ namespace M5.BloomFilter
                 throw new ArgumentOutOfRangeException(nameof(offset), "cannot be less than zero");
             }
 
-            if (offset >= buffer.Length)
+            if (offset > buffer.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(offset), "not a valid index into buffer");
             }
@@ -120,7 +120,7 @@ namespace M5.BloomFilter
                 throw new ArgumentOutOfRangeException(nameof(count), "cannot be less than zero");
             }
 
-            if (offset + count > buffer.Length)
+            if (count > buffer.Length - offset)
             {
                 throw new ArgumentOutOfRangeException(nameof(count), "exceeds buffer size");
             }

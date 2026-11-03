@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/google/elephant-goldfish-model",
+  "revision": "464db031e7dd1b9a79803ac8ea45f55c7c20c5bc",
+  "installation": "Complete project-local skills, personas, standards and documentation",
+  "local_adjustments": "Trailing whitespace and final blank lines normalized in docs/designs/architecture.md and drift_report.md."
+}

@@ -29,7 +29,7 @@ namespace M5.BitArraySerialization.Json.UnitTests
             var baAsBytes = ba.BitArrayToByteArray();
             var baDto = new BitArrayDTO(ba);
             var json = JsonSerializer.Serialize(baDto);
- 
+
             while (json.Length >= baAsBytes.Length)
             {
                 numberOfBits++;
@@ -56,14 +56,12 @@ namespace M5.BitArraySerialization.Json.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception), AllowDerivedTypes = true)]
         public void SerializeBitArrayNoJsonSerializerer()
         {
             var jsonOptions = new JsonSerializerOptions();
             var json = JsonSerializer.Serialize(_1000bits, jsonOptions);
             TestContext.WriteLine($"Length of JSON:{json.Length}");
-            var ba = JsonSerializer.Deserialize<BitArray>(json);
-            ba.ShouldBe(_1000bits);
+            Assert.ThrowsExactly<NotSupportedException>(() => JsonSerializer.Deserialize<BitArray>(json));
         }
 
         [TestMethod]

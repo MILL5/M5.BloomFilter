@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>M5.BloomFilter.Serialization</RootNamespace>
-    <Version>1.0.7</Version>
+    <Version>2.0.0</Version>
     <Authors>MILL5</Authors>
     <Copyright>Copyright © MILL5, LLC 2021</Copyright>
     <PackageProjectUrl>https://github.com/MILL5/M5.BloomFilter</PackageProjectUrl>
@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>

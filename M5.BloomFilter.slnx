@@ -1,0 +1,21 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <Platform Name="Any CPU" />
+  </Configurations>
+  <Folder Name="/M5.BitArraySerialization/">
+    <Project Path="M5.BitArraySerialization.Json.UnitTests/M5.BitArraySerialization.Json.UnitTests.csproj" />
+    <Project Path="M5.BitArraySerialization.Json/M5.BitArraySerialization.Json.csproj" />
+    <Project Path="M5.BitArraySerialization.ProtoBuf.UnitTests/M5.BitArraySerialization.ProtoBuf.UnitTests.csproj" />
+    <Project Path="M5.BitArraySerialization.ProtoBuf/M5.BitArraySerialization.ProtoBuf.csproj" />
+    <Project Path="M5.BitArraySerialization.Shared/M5.BitArraySerialization.Shared.shproj" />
+  </Folder>
+  <Folder Name="/M5.BloomFilter.Serialization/">
+    <Project Path="M5.BloomFilter.Serialization.Json/M5.BloomFilter.Serialization.Json.csproj" />
+    <Project Path="M5.BloomFilter.Serialization.ProtoBuf/M5.BloomFilter.Serialization.ProtoBuf.csproj" />
+    <Project Path="M5.BloomFilter.Serialization.UnitTests/M5.BloomFilter.Serialization.UnitTests.csproj" />
+  </Folder>
+  <Project Path="M5.BloomFilter.UnitTests/M5.BloomFilter.UnitTests.csproj" />
+  <Project Path="M5.BloomFilter/M5.BloomFilter.csproj" />
+</Solution>

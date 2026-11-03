@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Version 2 requires .NET 10. Hashing and primitive encodings changed; rebuild persisted filters from original keys. Version 1 filter payloads are rejected. See README.md for migration.</PackageReleaseNotes>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

@@ -5,7 +5,7 @@ namespace M5.BloomFilter.UnitTests
 {
     public class BloomIntTest
     {
-        public BloomIntTest(HashMethod hashMethod, IEnumerable<int> items, int expectedElements = int.MaxValue, double errorRate = 0.01)
+        public BloomIntTest(HashMethod hashMethod, IEnumerable<int> items, int expectedElements = 1000, double errorRate = 0.01)
         {
             var filter = FilterBuilder.Build(expectedElements, errorRate, hashMethod);
 

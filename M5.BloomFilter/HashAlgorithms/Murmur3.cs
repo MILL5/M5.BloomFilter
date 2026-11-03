@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 
 namespace M5.BloomFilter
 {
@@ -10,9 +11,11 @@ namespace M5.BloomFilter
     {
         public override int[] ComputeHash(byte[] data, int m, int k)
         {
+            Validate(data, m, k);
             int[] positions = new int[k];
-            long hash1 = MurmurHash3_32(0, data, 0, data.Length);
+            long hash1 = MurmurHash3_32(89478583, data, 0, data.Length);
             long hash2 = MurmurHash3_32((uint)hash1, data, 0, data.Length);
+            if (hash2 == 0) hash2 = 0x9e3779b9;
             for (int i = 0; i < k; i++)
             {
                 positions[i] = (int)((hash1 + i * hash2) % m);
@@ -25,18 +28,10 @@ namespace M5.BloomFilter
     {
         public override int[] ComputeHash(byte[] data, int m, int k)
         {
+            Validate(data, m, k);
             int[] positions = new int[k];
-            uint seed = 0;
-            int hashes = 0;
-            while (hashes < k)
-            {
-                seed = MurmurHash3_32(seed, data, 0, data.Length);
-                int hash = Rejection(seed, m);
-                if (hash != -1)
-                {
-                    positions[hashes++] = hash;
-                }
-            }
+            for (int i = 0; i < k; i++)
+                positions[i] = (int)(MurmurHash3_32(unchecked(89478583U + (uint)i * 0x9e3779b9U), data, 0, data.Length) % (uint)m);
             return positions;
         }
 
@@ -53,7 +48,7 @@ namespace M5.BloomFilter
             // body
             for (int i = 0; i < blocks; ++i)
             {
-                k1 = BitConverter.ToUInt32(data, offset + i * 4);
+                k1 = BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(offset + i * 4, 4));
 
                 k1 *= c1;
                 k1 = RotateLeft(k1, 15);

@@ -1,0 +1,27 @@
+# M5.BloomFilter
+
+> Open-source C# Bloom filter library for .NET 10, from MILL5 and Richard Crane, Microsoft MVP.
+
+- Website: https://mill5.github.io/M5.BloomFilter/
+- Source and release status: https://github.com/MILL5/M5.BloomFilter
+- Package: M5.BloomFilter (NuGet). The .NET 10 repository build documented here is not yet published; build from source. Existing NuGet releases may target older frameworks.
+- License: Apache-2.0
+- Author: Richard Crane, Microsoft MVP, founder of MILL5
+- Company: https://mill5.com/
+- Author profile: https://richcrane.ai/
+- MVP: https://mvp.microsoft.com/en-US/MVP/profile/10ce0bc0-7536-43f6-b28c-e9601a4a0d0d
+
+## Membership semantics
+A false result means definitely absent for a consistent, intact filter. A true result means possibly present: verify it against the original data. Requested error rate is a sizing target, not a measured guarantee. Exceeding the expected item count increases false positives. There is no delete operation.
+
+## Usage
+Use `FilterBuilder.Build(expectedElements: 100_000, errorRate: 0.01)`, then `Add(key)` and `Contains(key)`. The default is Murmur3KirschMitzenmacher. String extensions use UTF-8. Preserve hash and encoding choices. Statistics exposes M (bits), K (hashes), N (expected items), and P (calculated ideal false-positive estimate).
+
+## Snapshots and serialization
+`ToImmutable()` returns a detached ReadOnlyFilter snapshot. JSON package: M5.BloomFilter.Serialization.Json; register BloomFilterConverter for System.Text.Json or Newtonsoft.Json; nested bit arrays use annotated converters. Protobuf package: M5.BloomFilter.Serialization.ProtoBuf; wrap with M5.BloomFilter.Serialization.BloomFilter and restore with AsBloomFilter(). Standalone bit-array serializers do not encode the complete membership contract.
+
+## Migration
+Version 2 Bloom payloads identify the current hash/encoding contract. Rebuild older or unversioned payloads from original keys. Relabeling old bits as version 2 is not a migration.
+
+## Important limits
+Built-in operations synchronize bit access. HashBits returns a detached copy; mutating that copy does not affect the filter. Async methods wrap in-memory operations and do not offload work. The browser demo is a 64-bit, three-position teaching illustration with a simple JavaScript hash, not the C# implementation or a benchmark.

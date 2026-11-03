@@ -47,13 +47,14 @@ namespace M5.BloomFilter
 
         public override int[] ComputeHash(byte[] data, int m, int k)
         {
+            Validate(data, m, k);
             int[] positions = new int[k];
-
-            Random r = new Random((int)Hash(data));
-
+            uint state = Hash(data);
             for (int i = 0; i < k; i++)
             {
-                positions[i] = r.Next(m);
+                // Weyl sequence plus fixed avalanche, independent of System.Random.
+                state = unchecked(state + 0x9e3779b9);
+                positions[i] = (int)(Mix(state) % (uint)m);
             }
             return positions;
         }

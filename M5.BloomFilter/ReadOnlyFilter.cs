@@ -9,11 +9,22 @@ namespace M5.BloomFilter
 {
     public sealed class ReadOnlyFilter : IImmutableBloomFilter
     {
+        public const int CurrentFormatVersion = 2;
+        private readonly BitArray _hashBits;
+        public int FormatVersion => CurrentFormatVersion;
         public ReadOnlyFilter(BitArray hashBits, HashMethod hashMethod, int m, long n, short k, double p)
+            : this(hashBits, hashMethod, m, n, k, p, CurrentFormatVersion)
         {
-            CheckIsNotNull(nameof(hashBits), hashBits);
+        }
 
-            HashBits = hashBits;
+        public ReadOnlyFilter(BitArray hashBits, HashMethod hashMethod, int m, long n, short k, double p, int formatVersion)
+        {
+            if (formatVersion != CurrentFormatVersion)
+                throw new NotSupportedException("Unsupported Bloom filter format. Rebuild the filter from original keys with format version 2.");
+            CheckIsNotNull(nameof(hashBits), hashBits);
+            if (hashBits.Length != m)
+                throw new ArgumentException("Bit length must equal m.", nameof(hashBits));
+            _hashBits = new BitArray(hashBits);
             Hash = HashFunction.GetHashFunction(hashMethod);
 
             CheckIsNotNull(nameof(hashMethod), Hash);
@@ -25,12 +36,12 @@ namespace M5.BloomFilter
         {
             CheckIsNotNull(nameof(filter), filter);
 
-            HashBits = filter.HashBits.Clone() as BitArray;
+            _hashBits = new BitArray(filter.HashBits);
             Hash = filter.Hash;
             Statistics = filter.Statistics;
         }
 
-        public BitArray HashBits { get; }
+        public BitArray HashBits => new BitArray(_hashBits);
         public HashFunction Hash { get; }
         public Statistics Statistics { get; }
 
@@ -40,7 +51,7 @@ namespace M5.BloomFilter
 
             foreach (int position in positions)
             {
-                if (!HashBits.Get(position))
+                if (!_hashBits.Get(position))
                     return false;
             }
 
@@ -54,6 +65,7 @@ namespace M5.BloomFilter
 
         public ICollection<bool> Contains(IEnumerable<byte[]> elements)
         {
+            ArgumentNullException.ThrowIfNull(elements);
             var hashes = new List<int>();
             foreach (var element in elements)
             {
@@ -64,7 +76,7 @@ namespace M5.BloomFilter
 
             for (var i = 0; i < hashes.Count; i++)
             {
-                processResults[i] = HashBits.Get(hashes[i]);
+                processResults[i] = _hashBits.Get(hashes[i]);
             }
 
             var results = new List<bool>();
@@ -103,6 +115,7 @@ namespace M5.BloomFilter
 
         public int[] ComputeHash(byte[] data)
         {
+            ArgumentNullException.ThrowIfNull(data);
             return Hash.ComputeHash(data, Statistics.M, Statistics.K);
         }
 
