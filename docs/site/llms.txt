@@ -1,11 +1,13 @@
 # M5.BloomFilter
 
-> Open-source C# Bloom filter library for .NET 10, from MILL5 and Richard Crane, Microsoft MVP.
+> Source-available C# Bloom filter library for .NET 10, from MILL5 and Richard Crane, Microsoft MVP.
 
 - Website: https://mill5.github.io/M5.BloomFilter/
 - Source and release status: https://github.com/MILL5/M5.BloomFilter
-- Package: M5.BloomFilter (NuGet). The .NET 10 repository build documented here is not yet published; build from source. Existing NuGet releases may target older frameworks.
-- License: Apache-2.0
+- Package: M5.BloomFilter, version 2.0.1 (.NET 10). Check the repository for current release status.
+- Install: `dotnet add package M5.BloomFilter --version 2.0.1`
+- License: PolyForm Strict 1.0.0; https://github.com/MILL5/M5.BloomFilter/blob/main/LICENSE
+- Licensing: Source available under PolyForm Strict 1.0.0. The LICENSE terms govern. Uses outside the license’s permitted purposes require separate MILL5 authorization: https://mill5.com/
 - Author: Richard Crane, Microsoft MVP, founder of MILL5
 - Company: https://mill5.com/
 - Author profile: https://richcrane.ai/
@@ -21,6 +23,7 @@ Use `FilterBuilder.Build(expectedElements: 100_000, errorRate: 0.01)`, then `Add
 `ToImmutable()` returns a detached ReadOnlyFilter snapshot. JSON package: M5.BloomFilter.Serialization.Json; register BloomFilterConverter for System.Text.Json or Newtonsoft.Json; nested bit arrays use annotated converters. Protobuf package: M5.BloomFilter.Serialization.ProtoBuf; wrap with M5.BloomFilter.Serialization.BloomFilter and restore with AsBloomFilter(). Standalone bit-array serializers do not encode the complete membership contract.
 
 ## Migration
+Version 2.0.1 retains persisted payload format 2.
 Version 2 Bloom payloads identify the current hash/encoding contract. Rebuild older or unversioned payloads from original keys. Relabeling old bits as version 2 is not a migration.
 
 ## Important limits

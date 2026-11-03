@@ -6,8 +6,7 @@
     <Authors>MILL5</Authors>
     <PackageId>M5.BitArraySerialization.Json</PackageId>
     <Description>Serialization for BitArray in .NET with support for Newtonsoft.JSON and System.Text.Json serialization.</Description>
-    <Copyright>Copyright © MILL5, LLC 2021</Copyright>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Copyright>Copyright © MILL5, LLC 2021-2026</Copyright>
     <PackageProjectUrl>https://github.com/MILL5/M5.BloomFilter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MILL5/M5.BloomFilter</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -19,7 +18,7 @@
 	<RootNamespace>M5.BitArraySerialization.Json</RootNamespace>
 	<AssemblyName>M5.BitArraySerialization.Json</AssemblyName>
 	<PackageIconUrl />
-	<Version>2.0.0</Version>
+	<Version>2.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-# Releasing version 2.0.0
+# Releasing version 2.0.1
 
 ## Package family
 
@@ -11,7 +11,7 @@ Publish these five active packages together at the same version:
 - M5.BloomFilter.Serialization.ProtoBuf
 
 The unused M5.BloomFilter.Serialization skeleton is not a release package.
-All active packages include a README, Apache-2.0 license metadata, and symbols.
+All active packages include a README, the complete PolyForm Strict 1.0.0 LICENSE file, and symbols.
 
 ## Verification
 
@@ -51,10 +51,18 @@ artifacts, obtains credentials, then publishes the packages and matching symbols
 `--skip-duplicate` permits retrying a partly completed family release.
 
 After publishing, verify all five version indexes and inspect each .nuspec for
-net10.0, version 2.0.0, and matching internal dependencies. NuGet indexing can lag
+net10.0, version 2.0.1, an embedded LICENSE file matching the repository, and matching internal dependencies. NuGet indexing can lag
 an accepted push. Confirm the package gallery and a clean restore before claiming
 the release is available. Version 2.0.0 is incompatible with old persisted filters;
 include [the rebuild instructions](serialization.md) in the GitHub release notes.
 
 GitHub Pages is deployed separately from docs/site and can publish before NuGet.
 Its installation copy must accurately distinguish source and published packages.
+
+## License-only patch
+
+Version 2.0.1 adopts PolyForm Strict 1.0.0 with MILL5 copyright. Its hash format
+remains version 2 and is compatible with 2.0.0 payloads; no additional rebuild is
+needed when moving from 2.0.0 to 2.0.1. Earlier published package files retain
+their original license. NuGet package versions cannot be replaced, so the change
+ships in a new patch release. Leave third-party Apache/OFL licenses unchanged.

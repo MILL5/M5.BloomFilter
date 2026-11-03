@@ -1,9 +1,11 @@
 <Project>
   <PropertyGroup>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>Version 2 requires .NET 10. Hashing and primitive encodings changed; rebuild persisted filters from original keys. Version 1 filter payloads are rejected. See README.md for migration.</PackageReleaseNotes>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReleaseNotes>Version 2.0.1 changes the license to PolyForm Strict 1.0.0; runtime behavior and persisted format remain unchanged from 2.0.0. Version 2 requires .NET 10. Hashing and primitive encodings changed; rebuild persisted filters from original keys. Version 1 filter payloads are rejected. See README.md for migration.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="/" />
   </ItemGroup>
 </Project>
