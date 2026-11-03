@@ -2,14 +2,31 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
+    branches: [develop, main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  promotion:
+    name: Promotion from develop
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require the repository develop branch
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "$HEAD_BRANCH" != "develop" ] || [ "$HEAD_REPOSITORY" != "$REPOSITORY" ]; then
+            echo "::error::Promote changes to main through a PR from this repository's develop branch."
+            exit 1
+          fi
+
   test:
     name: ${{ matrix.os }} / ${{ matrix.configuration }}
     runs-on: ${{ matrix.os }}
