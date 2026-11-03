@@ -13,6 +13,25 @@ Publish these five active packages together at the same version:
 The unused M5.BloomFilter.Serialization skeleton is not a release package.
 All active packages include a README, the complete PolyForm Strict 1.0.0 LICENSE file, and symbols.
 
+## Branch workflow
+
+`develop` is the default development branch. Create feature branches from its
+latest commit and open pull requests back to `develop`. GitHub Copilot reviews
+ready PRs to `develop` automatically, including subsequent pushes. Inspect and
+resolve review findings without manually requesting another review.
+
+Both `develop` and `main` require pull requests, all four Linux/Windows
+Debug/Release CI checks, an up-to-date base, and resolved review conversations.
+Direct pushes, force pushes, and branch deletion are blocked, including for
+administrators. Human approval is optional for this solo-maintainer repository;
+automatic review does not replace required CI checks.
+
+Promote a tested `develop` to `main` through a merge PR. The required
+`Promotion from develop` check rejects any other source branch or fork.
+Use merge commits to preserve ancestry, retain `develop` after promotion, and
+merge `main` back into `develop` through a PR when synchronization is needed.
+Pages deployment and NuGet publication continue to use `main` and release tags.
+
 ## Verification
 
 Use SDK 10.0.403 from global.json. Run:
