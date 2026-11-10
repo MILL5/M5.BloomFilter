@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <None Update="Fixtures\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\docs\site\words.json" Link="Fixtures\site\words.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\docs\site\vectors.js" Link="Fixtures\site\vectors.js" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

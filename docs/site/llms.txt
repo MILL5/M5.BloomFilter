@@ -1,30 +1,51 @@
 # M5.BloomFilter
 
-> Source-available C# Bloom filter library for .NET 10, from MILL5 and Richard Crane, Microsoft MVP.
+> Source-available C# Bloom filter library for .NET 10, from MILL5 and Richard Crane, Microsoft MVP. Lock-free lookups, allocation-free keys, occupancy estimates, union of compatible filters, and versioned JSON and protobuf snapshots.
 
 - Website: https://mill5.github.io/M5.BloomFilter/
-- Source and release status: https://github.com/MILL5/M5.BloomFilter
-- Package: M5.BloomFilter, version 2.0.1 (.NET 10). Check the repository for current release status.
-- Install: `dotnet add package M5.BloomFilter --version 2.0.1`
-- License: PolyForm Strict 1.0.0; https://github.com/MILL5/M5.BloomFilter/blob/main/LICENSE
-- Licensing: Source available under PolyForm Strict 1.0.0. The LICENSE terms govern. Uses outside the license’s permitted purposes require separate MILL5 authorization: https://mill5.com/
-- Author: Richard Crane, Microsoft MVP, founder of MILL5
+- Source: https://github.com/MILL5/M5.BloomFilter
+- Package: M5.BloomFilter 2.1.0 on NuGet (.NET 10): https://www.nuget.org/packages/M5.BloomFilter/
+- Install: `dotnet add package M5.BloomFilter`
+- Companion packages: M5.BloomFilter.Serialization.Json, M5.BloomFilter.Serialization.ProtoBuf, M5.BitArraySerialization.Json, M5.BitArraySerialization.ProtoBuf
+- License: PolyForm Strict 1.0.0 (source-available, not open source): https://github.com/MILL5/M5.BloomFilter/blob/main/LICENSE
+- Author: Richard Crane, Microsoft MVP, founder of MILL5: https://richcrane.ai/
 - Company: https://mill5.com/
-- Author profile: https://richcrane.ai/
-- MVP: https://mvp.microsoft.com/en-US/MVP/profile/10ce0bc0-7536-43f6-b28c-e9601a4a0d0d
+- MVP profile: https://mvp.microsoft.com/en-US/MVP/profile/10ce0bc0-7536-43f6-b28c-e9601a4a0d0d
+- Usage guide: https://github.com/MILL5/M5.BloomFilter/blob/main/docs/usage.md
+- Serialization and migration: https://github.com/MILL5/M5.BloomFilter/blob/main/docs/serialization.md
+- Benchmarks: https://github.com/MILL5/M5.BloomFilter/blob/main/docs/benchmarks.md
 
-## Membership semantics
-A false result means definitely absent for a consistent, intact filter. A true result means possibly present: verify it against the original data. Requested error rate is a sizing target, not a measured guarantee. Exceeding the expected item count increases false positives. There is no delete operation.
+## What an answer means
+`Contains` returning false means the key is definitely absent, for an intact filter queried with the same hash strategy and key encoding it was built with. Returning true means possibly present: confirm it against the original data. The error rate passed to `FilterBuilder.Build` is a sizing target, not a measured guarantee and not a guarantee against chosen inputs. Adding more keys than planned raises the false-positive rate. There is no delete operation.
 
 ## Usage
-Use `FilterBuilder.Build(expectedElements: 100_000, errorRate: 0.01)`, then `Add(key)` and `Contains(key)`. The default is Murmur3KirschMitzenmacher. String extensions use UTF-8. Preserve hash and encoding choices. Statistics exposes M (bits), K (hashes), N (expected items), and P (calculated ideal false-positive estimate).
+```csharp
+using M5.BloomFilter;
+
+var seen = FilterBuilder.Build(expectedElements: 1_000_000, errorRate: 0.01);
+seen.Add("customer:42");
+seen.Add(8675309L);
+bool maybe = seen.Contains("customer:42");   // true: possibly present
+bool no = seen.Contains("customer:43");      // false: definitely absent
+```
+The default hash strategy is Murmur3KirschMitzenmacher; sixteen are available through `HashMethod`. Strings are hashed as UTF-8, numbers as little-endian bytes, `DateTime` as ticks. `Statistics` exposes M (bits), K (hashes), N (expected keys) and P (design false-positive estimate).
+
+## New in 2.1.0
+- Lookups take no lock; any number of threads can query one filter. Insertions and snapshots share one lock, so a snapshot is always a consistent state.
+- String, numeric and span keys are hashed without allocating for the two Murmur3 strategies.
+- `AddKey` and `ContainsKey` accept one key as `ReadOnlySpan<byte>`, `ReadOnlySpan<char>` or `string`.
+- `GetOccupancy()` returns `BloomFilterOccupancy`: `SetBits`, `TotalBits`, `HashCount`, `FillRatio`, `EstimatedFalsePositiveRate` and `EstimatedCount`, measured from the bits set now.
+- `UnionWith` (into a filter from `FilterBuilder`) and `Union` (returns a `ReadOnlyFilter`) combine filters with equal bit count, hash count and hash strategy; `IsCompatibleWith` tests that.
+- No breaking changes. Hashing, key encoding and persisted format version 2 are unchanged; 2.0.x and 2.1.0 read each other's snapshots.
 
 ## Snapshots and serialization
-`ToImmutable()` returns a detached ReadOnlyFilter snapshot. JSON package: M5.BloomFilter.Serialization.Json; register BloomFilterConverter for System.Text.Json or Newtonsoft.Json; nested bit arrays use annotated converters. Protobuf package: M5.BloomFilter.Serialization.ProtoBuf; wrap with M5.BloomFilter.Serialization.BloomFilter and restore with AsBloomFilter(). Standalone bit-array serializers do not encode the complete membership contract.
+`ToImmutable()` returns a detached `ReadOnlyFilter`. M5.BloomFilter.Serialization.Json provides `BloomFilterConverter` for System.Text.Json and Newtonsoft.Json. M5.BloomFilter.Serialization.ProtoBuf wraps a filter in `M5.BloomFilter.Serialization.BloomFilter`; restore with `AsBloomFilter()`. The core package also has `BloomFilterJsonConverter` (Newtonsoft.Json, uncompressed bits). Snapshots carry the bits, hash method, M, K, N, P and format version 2. Filters persisted by 1.x must be rebuilt from their original keys; relabelling old bits as version 2 produces false negatives.
 
-## Migration
-Version 2.0.1 retains persisted payload format 2.
-Version 2 Bloom payloads identify the current hash/encoding contract. Rebuild older or unversioned payloads from original keys. Relabeling old bits as version 2 is not a migration.
+## Measured performance
+BenchmarkDotNet 0.15.8, Apple M5 Max, .NET 10.0.14, recorded 2026-11-10, 2.0.1 against 2.1.0, mean per call: `Contains(string)` present 29.8 ns to 19.8 ns; absent 36.4 ns to 15.9 ns; `Contains(long)` 27.6 ns to 15.8 ns; `Contains(string)` with eight threads reading one filter 124.5 ns to 3.6 ns per lookup; `Add(string)` new key 38.6 ns to 29.7 ns. Allocation per call went from 56-112 bytes to zero. One machine; other hardware will differ.
 
-## Important limits
-Built-in operations synchronize bit access. HashBits returns a detached copy; mutating that copy does not affect the filter. Async methods wrap in-memory operations and do not offload work. The browser demo is a 64-bit, three-position teaching illustration with a simple JavaScript hash, not the C# implementation or a benchmark.
+## The demonstration on the website
+The page loads words.json, a snapshot of a filter holding the 172,823 words of the public-domain ENABLE word list: 1,657,884 bits (207 kB), 7 hashes, built by this library and written with `BloomFilterJsonConverter`. A JavaScript port of Murmur3KirschMitzenmacher (bloom.js) queries it in the browser and is checked against the same vectors as the C# tests, so the bit positions shown equal `ComputeHash` in C#. The filter is drawn as 1,727 punched cards of 960 bits each; that drawing is an illustration, not part of the library. Measured over one million fixed non-words, the filter returned 10,006 false positives (1.0006%).
+
+## Limits
+Not an exact set, not a security or authorization control, and not a replacement for the stored keys. Async methods complete synchronously and do not offload work. A single filter is limited to 2,147,483,647 bits; oversized requests throw.
