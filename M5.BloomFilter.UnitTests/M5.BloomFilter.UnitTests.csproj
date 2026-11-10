@@ -21,4 +21,8 @@
     <ProjectReference Include="..\M5.BloomFilter\M5.BloomFilter.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Fixtures\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

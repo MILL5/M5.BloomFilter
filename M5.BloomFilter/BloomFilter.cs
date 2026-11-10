@@ -7,10 +7,9 @@ using static Pineapple.Common.Preconditions;
 
 namespace M5.BloomFilter
 {
-    internal class BloomFilter : IBloomFilter
+    internal sealed class BloomFilter : IBloomFilter
     {
-        private readonly object _sync = new();
-        private readonly BitArray _hashBits;
+        private readonly FilterBits _bits;
 
         public BloomFilter(long expectedElements, double errorRate, HashFunction hashFunction)
         {
@@ -25,7 +24,7 @@ namespace M5.BloomFilter
 
             Statistics = new Statistics(expectedElements, errorRate);
 
-            _hashBits = new BitArray(Statistics.M);
+            _bits = new FilterBits(Statistics.M, Statistics.K, hashFunction);
         }
 
         public BloomFilter(int capacity, short hashes, HashFunction hashFunction)
@@ -38,35 +37,29 @@ namespace M5.BloomFilter
 
             Statistics = new Statistics(capacity, hashes);
 
-            _hashBits = new BitArray(Statistics.M);
+            _bits = new FilterBits(Statistics.M, Statistics.K, hashFunction);
         }
 
-        public BitArray HashBits { get { lock (_sync) return new BitArray(_hashBits); } }
+        internal FilterBits Bits => _bits;
+
+        public BitArray HashBits => _bits.Export();
 
         public HashFunction Hash { get; }
 
         public Statistics Statistics { get; } 
         
-        public virtual void Add(byte[] element)
+        public void Add(byte[] element)
         {
-            var positions = ComputeHash(element);
-
-            lock (_sync)
-            {
-                foreach (int position in positions)
-                {
-                    _hashBits.Set(position, true);
-                }
-            }
+            _bits.Add(element);
         }
 
-        public virtual Task AddAsync(byte[] element)
+        public Task AddAsync(byte[] element)
         {
             Add(element);
             return Task.CompletedTask;
         }
 
-        public virtual void Add(IEnumerable<byte[]> elements)
+        public void Add(IEnumerable<byte[]> elements)
         {
             ArgumentNullException.ThrowIfNull(elements);
             var hashes = new List<int>();
@@ -76,43 +69,26 @@ namespace M5.BloomFilter
                 hashes.AddRange(ComputeHash(element));
             }
 
-            lock (_sync)
-            {
-                for (var i = 0; i < hashes.Count; i++)
-                {
-                    _hashBits.Set(hashes[i], true);
-                }
-            }
+            _bits.Set(hashes);
         }
 
-        public virtual Task AddAsync(IEnumerable<byte[]> elements)
+        public Task AddAsync(IEnumerable<byte[]> elements)
         {
             Add(elements);
             return Task.CompletedTask;
         }
 
-        public virtual bool Contains(byte[] element)
+        public bool Contains(byte[] element)
         {
-            var positions = ComputeHash(element);
-            
-            lock (_sync)
-            {
-                foreach (int position in positions)
-                {
-                    if (!_hashBits.Get(position))
-                        return false;
-                }
-            }
-
-            return true;
+            return _bits.Contains(element);
         }
 
-        public virtual Task<bool> ContainsAsync(byte[] element)
+        public Task<bool> ContainsAsync(byte[] element)
         {
             return Task.FromResult(Contains(element));
         }
 
-        public virtual ICollection<bool> Contains(IEnumerable<byte[]> elements)
+        public ICollection<bool> Contains(IEnumerable<byte[]> elements)
         {
             ArgumentNullException.ThrowIfNull(elements);
             var hashes = new List<int>();
@@ -121,45 +97,20 @@ namespace M5.BloomFilter
                 hashes.AddRange(ComputeHash(element));
             }
 
-            var processResults = new bool[hashes.Count];
-            lock (_sync)
-            {
-                for (var i = 0; i < hashes.Count; i++)
-                {
-                    processResults[i] = _hashBits.Get(hashes[i]);
-                }
-            }
-
-            var results = new List<bool>();
-            bool isPresent = true;
-            int processed = 0;
-
-            //For each value check, if all bits in ranges of hashes bits are set
-            foreach (var item in processResults)
-            {
-                if (!item) isPresent = false;
-                if ((processed + 1) % Statistics.K == 0)
-                {
-                    results.Add(isPresent);
-                    isPresent = true;
-                }
-                processed++;
-            }
-
-            return results;
+            return _bits.TestGroups(hashes);
         }
 
-        public virtual Task<ICollection<bool>> ContainsAsync(IEnumerable<byte[]> elements)
+        public Task<ICollection<bool>> ContainsAsync(IEnumerable<byte[]> elements)
         {
             return Task.FromResult(Contains(elements));
         }
 
-        public virtual bool All(IEnumerable<byte[]> elements)
+        public bool All(IEnumerable<byte[]> elements)
         {
             return Contains(elements).All(e => e);
         }
 
-        public virtual Task<bool> AllAsync(IEnumerable<byte[]> elements)
+        public Task<bool> AllAsync(IEnumerable<byte[]> elements)
         {
             return Task.FromResult(All(elements));
         }

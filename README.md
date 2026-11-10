@@ -9,18 +9,21 @@ are allowed. There is no delete operation.
 
 [Website](https://mill5.github.io/M5.BloomFilter/) ·
 [Usage](docs/usage.md) · [Serialization and migration](docs/serialization.md) ·
-[Design and review](docs/designs/bloom-filter-correctness.md)
+[Benchmarks](docs/benchmarks.md) ·
+[Design and review](docs/designs/v2-1-lock-free-and-page.md)
 
 ## Get started
 
 This repository targets .NET 10 and pins SDK 10.0.403 in `global.json`.
-Version 2.0.0 introduces breaking changes; 1.x packages use the older .NET 5
-implementation. Rebuild persisted filters before upgrading. Install the current
-[NuGet package](https://www.nuget.org/packages/M5.BloomFilter/2.0.1):
+Install the current
+[NuGet package](https://www.nuget.org/packages/M5.BloomFilter/2.1.0):
 
 ```sh
-dotnet add package M5.BloomFilter --version 2.0.1
+dotnet add package M5.BloomFilter --version 2.1.0
 ```
+
+Moving from 2.0.x needs no code or data changes. Moving from 1.x does: version 2
+changed hashing, so [rebuild persisted filters](#version-2-migration) first.
 
 ```csharp
 using M5.BloomFilter;
@@ -34,6 +37,31 @@ bool all = filter.All(new[] { 12, 34, 56 });
 var snapshot = filter.ToImmutable();
 ```
 
+## New in 2.1
+
+```csharp
+// Lookups take no lock, and string, numeric and span keys are hashed without
+// allocating when the filter uses a Murmur3 strategy (the default).
+bool maybe = filter.Contains(42L);
+bool sliced = filter.ContainsKey(line.AsSpan(0, 11));   // one key from part of a buffer
+filter.AddKey(utf8Bytes);                               // ReadOnlySpan<byte>
+
+// How full is it, really?
+BloomFilterOccupancy now = filter.GetOccupancy();
+double fill = now.FillRatio;                    // set bits / total bits
+double falsePositives = now.EstimatedFalsePositiveRate;
+double keys = now.EstimatedCount;
+
+// Fill one filter per worker, then combine them.
+whole.UnionWith(shard);                         // same size, hash count and strategy
+ReadOnlyFilter merged = snapshotA.Union(snapshotB);
+```
+
+Hashing, key encoding and the persisted format are unchanged: 2.0.x and 2.1.0
+read each other's snapshots, and the test suite checks both directions against
+fixtures written by the published 2.0.1 packages. Measured results are in
+[docs/benchmarks.md](docs/benchmarks.md).
+
 The default hash strategy is `Murmur3KirschMitzenmacher`; sixteen strategies are
 available through `HashMethod`. Strings use UTF-8; primitive numbers use
 little-endian bytes. Use the same value representation for insertion and lookup.
@@ -42,12 +70,17 @@ Empty byte arrays are valid keys; null keys are rejected.
 ## Guarantees and limits
 
 - `Add` only sets bits; repeating an insertion has no effect.
-- Built-in mutation, queries and snapshot exports synchronize access to bits.
+- Lookups are lock-free and see every insertion that has completed. Insertions
+  and snapshot exports share one lock, so a snapshot is always a consistent state.
   `ToImmutable()` returns a detached snapshot. `HashBits` returns a defensive copy.
 - `Statistics.M`, `K`, `N`, and `P` describe bits, hashes, expected elements and
   the ideal independent-hash false-positive estimate at that capacity.
   Actual rates depend on the hash strategy and input distribution; overfilling
   increases them. A requested error rate is not an adversarial-data guarantee.
+- `Statistics` describes the design. `GetOccupancy()` measures the bits set now
+  and estimates the key count and false-positive rate from them.
+- `UnionWith` and `Union` require equal bit count, hash count and hash strategy
+  and throw otherwise. A union keeps every key of both filters.
 - Async methods wrap synchronous in-memory work in completed tasks.
 - Filters are not an exact set, authorization check, or replacement for stored keys.
 
@@ -64,8 +97,13 @@ The SDK migration preserves all ten solution projects (including the shared
 project), both solution folders, and Debug/Release with Any CPU. The unused
 `M5.BloomFilter.Serialization` skeleton remains outside the solution as before.
 Regression tests cover all hash strategies, independent Murmur vectors, frozen
-format vectors, false-positive rates, concurrent writers, snapshots, collection
-encoding, populated persistence, and malformed bit streams.
+format vectors, false-positive rates, concurrent readers and writers, snapshots,
+collection encoding, populated persistence, and malformed bit streams.
+
+Two tool projects sit outside the solution, are never packed, and are run by
+hand: `tools/V201Oracle` writes the compatibility fixtures from the published
+2.0.1 packages, and `benchmarks/M5.BloomFilter.Benchmarks` produces
+[docs/benchmarks.md](docs/benchmarks.md).
 
 ## Version 2 migration
 
@@ -94,7 +132,7 @@ Package release steps are in [the release guide](docs/releasing.md).
 
 ## License
 
-Version 2.0.1 adopts [PolyForm Strict 1.0.0](LICENSE), with copyright retained by
+Versions 2.0.1 and later use [PolyForm Strict 1.0.0](LICENSE), with copyright retained by
 MILL5, LLC. This is source-available software; the license permits the uses it
 expressly describes. Uses outside those terms require separate authorization
 from MILL5. Read the full license before using the software.

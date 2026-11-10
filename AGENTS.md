@@ -5,6 +5,7 @@
 - Preserve Bloom invariants: inserted keys never become absent, hashes are deterministic and in range, duplicate insertion is idempotent, snapshots own their bits.
 - Test all hash methods, empty keys, sizing boundaries, concurrency, and populated serialization. False positives are permitted; false negatives are defects.
 - Hash or encoding changes require an explicit persisted format version and migration documentation. Never silently reinterpret old bitsets.
+- `Fixtures/v2.0.1/` in both test projects were written by the published 2.0.1 packages through `tools/V201Oracle`. Never regenerate them from current source; a fast path must reproduce them. `tools/` and `benchmarks/` projects stay outside `M5.BloomFilter.slnx` and are not packable.
 - EGM runtime is project-local in `.agents/`; author designs in `docs/designs/`, use fresh-context Goldfish reviewers, resolve material findings before implementation.
 - EGM artifact directory: docs/designs
 - Branch flow: create feature branches from `develop`, open PRs to `develop`, then promote `develop` to `main` by merge PR. Never push directly to either protected branch; retain `develop` after promotion. GitHub Copilot reviews PRs to `develop` automatically.

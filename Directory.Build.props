@@ -2,7 +2,7 @@
   <PropertyGroup>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReleaseNotes>Version 2.0.1 changes the license to PolyForm Strict 1.0.0; runtime behavior and persisted format remain unchanged from 2.0.0. Version 2 requires .NET 10. Hashing and primitive encodings changed; rebuild persisted filters from original keys. Version 1 filter payloads are rejected. See README.md for migration.</PackageReleaseNotes>
+    <PackageReleaseNotes>Version 2.1.0: lookups no longer take a lock; string, numeric and span keys are hashed without allocating for the default Murmur3 strategies; new AddKey/ContainsKey span overloads, GetOccupancy (fill ratio, estimated key count and current false-positive rate) and Union/UnionWith for combining filters built with the same settings. No breaking changes: hashing, key encoding and the persisted format (version 2) are unchanged, and 2.0.x and 2.1.0 read each other&apos;s snapshots. Version 2 requires .NET 10; filters persisted by 1.x must be rebuilt from their original keys. See README.md.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />

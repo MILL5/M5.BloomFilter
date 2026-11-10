@@ -43,3 +43,7 @@ Before the fix, an isolated executable built from original HEAD sources produced
 ## Checksum hybrid regression
 
 The initial v2 checksum-only derivation produced 1500 false positives in 50000 disjoint structured-key probes for Adler32 at a requested 1% error rate (3%; six-sigma upper bound 1.267%). The corrected derivation includes the full original key through independent FNV1a discrimination; the statistical acceptance threshold is unchanged. The corrected Adler32 result is 466/50000 (0.932%). The combined golden-vector and all-16-method statistical run passes 36/36 tests. Checksum golden vectors were recalculated independently using Python zlib CRC32/Adler32, a bitwise nonreflected CRC32 implementation, and the specified FNV/avalanche arithmetic.
+
+## Version 2.1.0
+
+The format is unchanged. Version 2.1.0 adds an internal span implementation of IDs 11 and 12 that is used by the built-in filters to avoid allocating. It shares one MurmurHash3 x86_32 core with the array methods. `M5.BloomFilter.UnitTests/Fixtures/v2.0.1/positions.txt`, written by the published 2.0.1 package, pins all sixteen IDs for input lengths 0–9, 15–17, 31–33, 255–257 and 1024 at m = 97, 1000003 and 2147483647, and both implementations must reproduce it. A subclass of a built-in strategy is never routed to the span implementation.
