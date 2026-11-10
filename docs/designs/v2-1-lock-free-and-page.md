@@ -51,8 +51,9 @@ layout `BitArray` uses, so exported bits and serialized bytes are unchanged.
 - **Writers keep the lock** (`Add`, batch `Add`, `UnionWith`). Inside it they OR
   bits into the words with plain writes; only one writer runs at a time, so no
   update is lost, and leaving the lock publishes the writes.
-- **Lookups take no lock.** A lookup issues one `Volatile.ReadBarrier()` and
-  then reads the words it needs with ordinary reads.
+- **Lookups take no lock.** A lookup does one volatile read of a publication
+  counter that every writer volatile-writes before leaving the lock, then reads
+  the words it needs with ordinary reads.
 - **Snapshots keep the lock** (`HashBits`, `ToImmutable()`), exactly as in 2.0:
   a snapshot is the state after some whole number of completed write calls.
 
@@ -70,7 +71,7 @@ runtime). It does not use `new BitArray(int[])`, which .NET 10 rejects above
 | Invariant | Why it holds |
 |---|---|
 | Inserted keys never become absent | Bits are only OR-ed in, by one writer at a time. |
-| A lookup after a completed `Add` sees it | Leaving the lock is a full fence; a lookup's acquire barrier orders its reads after whatever told the caller the insertion had finished. |
+| A lookup after a completed `Add` sees it | Writers volatile-write a publication counter after setting bits; a lookup volatile-reads it before reading words. |
 | Snapshots are consistent and own their bits | Taken under the writer lock into new storage. |
 | Duplicate insertion is idempotent | OR is idempotent. |
 
@@ -402,6 +403,7 @@ were resolved in this revision before implementation.
 | Source review after implementation (Codex) | A batch lookup short-circuited before reaching an out-of-range position from a custom hash that 2.0 rejected. | Every batch position is validated before any answer; regression test added. |
 | Source review after implementation (Codex) | The concurrent-union test asserted nothing until the writer had finished. | Each overlapping union now asserts every key completed before it began. |
 | Source review after implementation (Codex) | No discrepancy found in the stepped modulo for any `m`, the UTF-8 replacement behaviour, scalar encodings, stack buffers, last-word masking, maximum capacity, big-endian export, or the barrier and all-set shortcut. | Recorded. |
+| Pull request review (Copilot) | A read barrier alone is not a paired publication with the writers' ordinary writes; fixture items should use `Update`, not `Include`. | Writers volatile-write a counter that lookups volatile-read; both test projects use `Update`. |
 | Comprehension and zoom-out (Gemini via agy) | `AddKey((string)null)` would insert the empty key. | `string` overloads that throw (C4). |
 | Comprehension and zoom-out (Gemini via agy) | Four diagnostics that each clone `HashBits`; misleading union statistics. | One `GetOccupancy()` call (C5); union statistics documented as design values (C6). |
 | Comprehension and zoom-out (Gemini via agy) | Problem statement promised batch fast paths that were not designed; package IDs unnamed. | Batch performance is an explicit non-goal; IDs listed. |

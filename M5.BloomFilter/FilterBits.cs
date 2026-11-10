@@ -30,6 +30,11 @@ namespace M5.BloomFilter
         private readonly int _k;
         private readonly bool _doubleHash;
 
+        // Writers store here after changing words and readers load it before
+        // reading them: a paired volatile write and read on one location, so a
+        // lookup that starts after an insertion returned sees its bits.
+        private int _published;
+
         public FilterBits(int m, int k, HashFunction hash)
             : this(new int[WordCount(m)], m, k, hash)
         {
@@ -97,7 +102,7 @@ namespace M5.BloomFilter
         {
             int m = _m;
             Murmur3KirschMitzenmacher.First(key, m, out int position, out uint step);
-            Volatile.ReadBarrier();
+            Volatile.Read(ref _published);
             int[] words = _words;
             for (int i = 0; i < _k; i++)
             {
@@ -185,9 +190,8 @@ namespace M5.BloomFilter
         /// <summary>Lock-free. Sees every insertion that completed before the call.</summary>
         public bool Test(ReadOnlySpan<int> positions)
         {
-            // One acquire barrier orders every read below after whatever told the
-            // caller an insertion had finished; writers publish by leaving the lock.
-            Volatile.ReadBarrier();
+            // Pairs with the volatile write every writer makes before leaving the lock.
+            Volatile.Read(ref _published);
             int[] words = _words;
             foreach (int position in positions)
             {
@@ -207,7 +211,7 @@ namespace M5.BloomFilter
         {
             // Validate first, and notice when there is nothing to write: adding a
             // key whose bits are all set changes nothing, so it needs no lock.
-            Volatile.ReadBarrier();
+            Volatile.Read(ref _published);
             int[] words = _words;
             int allSet = 1;
             foreach (int position in positions)
@@ -222,6 +226,7 @@ namespace M5.BloomFilter
             {
                 foreach (int position in positions)
                     _words[position >> 5] |= 1 << (position & 31);
+                Volatile.Write(ref _published, _published + 1);
             }
         }
 
@@ -251,6 +256,7 @@ namespace M5.BloomFilter
             {
                 for (int i = 0; i < _words.Length; i++)
                     _words[i] |= words[i];
+                Volatile.Write(ref _published, _published + 1);
             }
         }
 
@@ -296,7 +302,7 @@ namespace M5.BloomFilter
 
         public int CountSetBits()
         {
-            Volatile.ReadBarrier();
+            Volatile.Read(ref _published);
             long count = 0;
             foreach (int word in _words)
                 count += BitOperations.PopCount((uint)word);
