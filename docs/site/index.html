@@ -220,12 +220,14 @@ var seen = FilterBuilder.Build(
 seen.Add("customer:42");
 seen.Add(8675309L);
 
+string key = "customer:43";
+
 <span class="c">// A no is certain: skip the database.</span>
-if (!seen.Contains("customer:43"))
+if (!seen.Contains(key))
     return NotFound();
 
 <span class="c">// A yes is a maybe: go and check.</span>
-var row = await db.FindAsync(id);</code></pre>
+var row = await db.FindAsync(key);</code></pre>
     </div>
   </div>
 

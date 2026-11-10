@@ -16,6 +16,10 @@ if (!listPath) {
 const entries = readFileSync(listPath, 'ascii').split('\n').map(w => w.trim()).filter(Boolean);
 const words = new Set(entries);
 const samples = Number(samplesArg ?? 5_000_000);
+if (!Number.isInteger(samples) || samples < 1) {
+  console.error('samples must be a whole number, 1 or more');
+  process.exit(2);
+}
 let failed = false;
 
 // 1. No list entry contains any of the generator's letter pairs.
