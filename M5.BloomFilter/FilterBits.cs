@@ -1,6 +1,5 @@
 using System;
 using System.Buffers;
-using System.Buffers.Binary;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
@@ -276,25 +275,26 @@ namespace M5.BloomFilter
         public BitArray Export()
         {
             // new BitArray(int[]) rejects the word count needed above
-            // 2,147,483,616 bits, so size by logical length and fill the bytes.
+            // 2,147,483,616 bits, so size by logical length and fill it.
             var bits = new BitArray(_m);
-            Span<byte> target = CollectionsMarshal.AsBytes(bits);
-            lock (_sync)
+            if (BitConverter.IsLittleEndian)
             {
-                if (BitConverter.IsLittleEndian)
+                // Bit i is byte i / 8, bit i % 8 in both layouts.
+                Span<byte> target = CollectionsMarshal.AsBytes(bits);
+                lock (_sync)
                 {
                     MemoryMarshal.AsBytes(_words.AsSpan())[..target.Length].CopyTo(target);
                 }
-                else
-                {
-                    Span<byte> word = stackalloc byte[4];
-                    for (int i = 0; i < _words.Length; i++)
-                    {
-                        BinaryPrimitives.WriteInt32LittleEndian(word, _words[i]);
-                        int offset = i * 4;
-                        word[..Math.Min(4, target.Length - offset)].CopyTo(target[offset..]);
-                    }
-                }
+
+                return bits;
+            }
+
+            // Elsewhere make no assumption about BitArray's storage: set each bit.
+            int[] words = CopyWords();
+            for (int i = 0; i < words.Length; i++)
+            {
+                for (uint word = (uint)words[i]; word != 0; word &= word - 1)
+                    bits[(i << 5) + BitOperations.TrailingZeroCount(word)] = true;
             }
 
             return bits;
