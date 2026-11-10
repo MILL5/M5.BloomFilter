@@ -18,7 +18,7 @@
 	<RootNamespace>M5.BitArraySerialization.Json</RootNamespace>
 	<AssemblyName>M5.BitArraySerialization.Json</AssemblyName>
 	<PackageIconUrl />
-	<Version>2.0.1</Version>
+	<Version>2.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

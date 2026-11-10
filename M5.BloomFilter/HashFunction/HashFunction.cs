@@ -38,6 +38,14 @@ namespace M5.BloomFilter
 
         public abstract int[] ComputeHash(byte[] data, int m, int k);
 
+        /// <summary>
+        /// Writes positions.Length positions without allocating and returns true,
+        /// or returns false when this exact type has no span implementation. An
+        /// override must return false for derived types so that a subclass which
+        /// overrides the array method keeps being called.
+        /// </summary>
+        internal virtual bool TryComputeHash(ReadOnlySpan<byte> data, int m, Span<int> positions) => false;
+
         protected static void Validate(byte[] data, int m, int k)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));

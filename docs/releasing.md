@@ -1,4 +1,4 @@
-# Releasing version 2.0.1
+# Releasing version 2.1.0
 
 ## Package family
 
@@ -48,6 +48,17 @@ CI must pass on Linux and Windows. Inspect the exact PR head and automatic revie
 findings, resolve material issues, merge, then publish from the merged main commit
 or its release tag. Do not manually request reviews or use no-op pushes.
 
+Before publishing a version that touches hashing, storage or serialization, check
+that the published 2.0.1 code can read its output:
+
+```sh
+M5_ORACLE_OUT=/tmp/m5-current dotnet test M5.BloomFilter.Serialization.UnitTests
+dotnet run -c Release --project tools/V201Oracle -- --read /tmp/m5-current
+```
+
+Every line must report `missing=0`. The fixtures under `Fixtures/v2.0.1/` were
+written by the published packages; never regenerate them from current source.
+
 ## Authentication
 
 The release workflow supports either a scoped `NUGET_API_KEY` repository secret
@@ -69,14 +80,27 @@ dispatched on main. It repeats auditing/tests/pack, uploads reviewable package
 artifacts, obtains credentials, then publishes the packages and matching symbols.
 `--skip-duplicate` permits retrying a partly completed family release.
 
-After publishing, verify all five version indexes and inspect each .nuspec for
-net10.0, version 2.0.1, an embedded LICENSE file matching the repository, and matching internal dependencies. NuGet indexing can lag
+Create the release on the merged commit, for example
+`gh release create v2.1.0 --target <main SHA>`; the tag must point at a commit on
+`main`. After publishing, verify all five version indexes and inspect each .nuspec for
+net10.0, version 2.1.0, an embedded LICENSE file matching the repository, and matching internal dependencies. NuGet indexing can lag
 an accepted push. Confirm the package gallery and a clean restore before claiming
 the release is available. Version 2.0.0 is incompatible with old persisted filters;
 include [the rebuild instructions](serialization.md) in the GitHub release notes.
 
 GitHub Pages is deployed separately from docs/site and can publish before NuGet.
 Its installation copy must accurately distinguish source and published packages.
+When a release changes what the page says about the package, merge the page
+change after the packages are verified on nuget.org.
+
+## Version 2.1.0
+
+A feature release with no breaking changes. Hashing, key encoding and persisted
+format version 2 are unchanged, so nothing needs rebuilding when moving between
+2.0.x and 2.1.0 in either direction. Lookups no longer take the filter's lock;
+insertions and snapshots still do. See
+[the design and review record](designs/v2-1-lock-free-and-page.md) and
+[the recorded benchmarks](benchmarks.md).
 
 ## License-only patch
 
