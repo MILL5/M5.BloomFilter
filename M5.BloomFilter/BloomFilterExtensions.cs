@@ -14,11 +14,16 @@ namespace M5.BloomFilter
     {
         #region Byte
 
-        public static void Add(this IBloomFilter bloomFilter, byte data) => bloomFilter.Add(new[] { data });
+        public static void Add(this IBloomFilter bloomFilter, byte data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[1], data));
+            else bloomFilter.Add(new[] { data });
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, byte data) => bloomFilter.AddAsync(new[] { data });
 
-        public static bool Contains(this IBloomFilter bloomFilter, byte data) => bloomFilter.Contains(new[] { data });
+        public static bool Contains(this IBloomFilter bloomFilter, byte data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[1], data)) : bloomFilter.Contains(new[] { data });
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, byte data) => bloomFilter.ContainsAsync(new[] { data });
 
@@ -39,11 +44,16 @@ namespace M5.BloomFilter
 
         #region String
 
-        public static void Add(this IBloomFilter bloomFilter, string data) => bloomFilter.Add(Encoding.UTF8.GetBytes(data));
+        public static void Add(this IBloomFilter bloomFilter, string data)
+        {
+            if (data != null && Fast(bloomFilter) is { } bits) bits.AddUtf8(data);
+            else bloomFilter.Add(Encoding.UTF8.GetBytes(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, string data) => bloomFilter.AddAsync(Encoding.UTF8.GetBytes(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, string data) => bloomFilter.Contains(Encoding.UTF8.GetBytes(data));
+        public static bool Contains(this IBloomFilter bloomFilter, string data)
+            => data != null && Fast(bloomFilter) is { } bits ? bits.ContainsUtf8(data) : bloomFilter.Contains(Encoding.UTF8.GetBytes(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, string data) => bloomFilter.ContainsAsync(Encoding.UTF8.GetBytes(data));
 
@@ -64,11 +74,16 @@ namespace M5.BloomFilter
 
         #region Double
 
-        public static void Add(this IBloomFilter bloomFilter, double data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, double data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[8], BitConverter.DoubleToInt64Bits(data)));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, double data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, double data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, double data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[8], BitConverter.DoubleToInt64Bits(data))) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, double data) => bloomFilter.ContainsAsync(Encode(data));
 
@@ -89,11 +104,16 @@ namespace M5.BloomFilter
 
         #region Single
 
-        public static void Add(this IBloomFilter bloomFilter, float data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, float data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[4], BitConverter.SingleToInt32Bits(data)));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, float data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, float data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, float data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[4], BitConverter.SingleToInt32Bits(data))) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, float data) => bloomFilter.ContainsAsync(Encode(data));
 
@@ -114,11 +134,16 @@ namespace M5.BloomFilter
 
         #region Int16
 
-        public static void Add(this IBloomFilter bloomFilter, short data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, short data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[2], data));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, short data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, short data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, short data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[2], data)) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, short data) => bloomFilter.ContainsAsync(Encode(data));
 
@@ -139,11 +164,16 @@ namespace M5.BloomFilter
 
         #region Int32
 
-        public static void Add(this IBloomFilter bloomFilter, int data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, int data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[4], data));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, int data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, int data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, int data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[4], data)) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, int data) => bloomFilter.ContainsAsync(Encode(data));
 
@@ -164,11 +194,16 @@ namespace M5.BloomFilter
 
         #region Int64
 
-        public static void Add(this IBloomFilter bloomFilter, long data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, long data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[8], data));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, long data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, long data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, long data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[8], data)) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, long data) => bloomFilter.ContainsAsync(Encode(data));
 
@@ -189,11 +224,16 @@ namespace M5.BloomFilter
 
         #region UInt16
 
-        public static void Add(this IBloomFilter bloomFilter, ushort data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, ushort data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[2], data));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, ushort data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, ushort data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, ushort data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[2], data)) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, ushort data) => bloomFilter.ContainsAsync(Encode(data));
 
@@ -214,11 +254,16 @@ namespace M5.BloomFilter
 
         #region UInt32
 
-        public static void Add(this IBloomFilter bloomFilter, uint data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, uint data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[4], data));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, uint data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, uint data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, uint data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[4], data)) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, uint data) => bloomFilter.ContainsAsync(Encode(data));
 
@@ -239,11 +284,16 @@ namespace M5.BloomFilter
 
         #region UInt64
 
-        public static void Add(this IBloomFilter bloomFilter, ulong data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, ulong data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[8], data));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, ulong data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, ulong data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, ulong data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[8], data)) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, ulong data) => bloomFilter.ContainsAsync(Encode(data));
 
@@ -264,11 +314,16 @@ namespace M5.BloomFilter
 
         #region DateTime
 
-        public static void Add(this IBloomFilter bloomFilter, DateTime data) => bloomFilter.Add(Encode(data));
+        public static void Add(this IBloomFilter bloomFilter, DateTime data)
+        {
+            if (Fast(bloomFilter) is { } bits) bits.Add(Bytes(stackalloc byte[8], data.Ticks));
+            else bloomFilter.Add(Encode(data));
+        }
 
         public static Task AddAsync(this IBloomFilter bloomFilter, DateTime data) => bloomFilter.AddAsync(Encode(data));
 
-        public static bool Contains(this IBloomFilter bloomFilter, DateTime data) => bloomFilter.Contains(Encode(data));
+        public static bool Contains(this IBloomFilter bloomFilter, DateTime data)
+            => Fast(bloomFilter) is { } bits ? bits.Contains(Bytes(stackalloc byte[8], data.Ticks)) : bloomFilter.Contains(Encode(data));
 
         public static Task<bool> ContainsAsync(this IBloomFilter bloomFilter, DateTime data) => bloomFilter.ContainsAsync(Encode(data));
 

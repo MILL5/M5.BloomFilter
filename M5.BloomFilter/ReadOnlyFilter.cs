@@ -10,7 +10,7 @@ namespace M5.BloomFilter
     public sealed class ReadOnlyFilter : IImmutableBloomFilter
     {
         public const int CurrentFormatVersion = 2;
-        private readonly BitArray _hashBits;
+        private readonly FilterBits _bits;
         public int FormatVersion => CurrentFormatVersion;
         public ReadOnlyFilter(BitArray hashBits, HashMethod hashMethod, int m, long n, short k, double p)
             : this(hashBits, hashMethod, m, n, k, p, CurrentFormatVersion)
@@ -24,38 +24,41 @@ namespace M5.BloomFilter
             CheckIsNotNull(nameof(hashBits), hashBits);
             if (hashBits.Length != m)
                 throw new ArgumentException("Bit length must equal m.", nameof(hashBits));
-            _hashBits = new BitArray(hashBits);
             Hash = HashFunction.GetHashFunction(hashMethod);
 
             CheckIsNotNull(nameof(hashMethod), Hash);
 
             Statistics = new Statistics(m, n, k, p);
+            _bits = new FilterBits(hashBits, m, k, Hash);
         }
 
         public ReadOnlyFilter(IBloomFilter filter)
         {
             CheckIsNotNull(nameof(filter), filter);
 
-            _hashBits = new BitArray(filter.HashBits);
             Hash = filter.Hash;
             Statistics = filter.Statistics;
+            _bits = filter is BloomFilter builtIn
+                ? builtIn.Bits.Snapshot()
+                : new FilterBits(filter.HashBits, Statistics.M, Statistics.K, Hash);
         }
 
-        public BitArray HashBits => new BitArray(_hashBits);
+        internal ReadOnlyFilter(int[] words, HashFunction hash, Statistics statistics)
+        {
+            Hash = hash;
+            Statistics = statistics;
+            _bits = new FilterBits(words, statistics.M, statistics.K, hash);
+        }
+
+        internal FilterBits Bits => _bits;
+
+        public BitArray HashBits => _bits.Export();
         public HashFunction Hash { get; }
         public Statistics Statistics { get; }
 
         public bool Contains(byte[] element)
         {
-            var positions = ComputeHash(element);
-
-            foreach (int position in positions)
-            {
-                if (!_hashBits.Get(position))
-                    return false;
-            }
-
-            return true;
+            return _bits.Contains(element);
         }
 
         public Task<bool> ContainsAsync(byte[] element)
@@ -72,30 +75,7 @@ namespace M5.BloomFilter
                 hashes.AddRange(ComputeHash(element));
             }
 
-            var processResults = new bool[hashes.Count];
-
-            for (var i = 0; i < hashes.Count; i++)
-            {
-                processResults[i] = _hashBits.Get(hashes[i]);
-            }
-
-            var results = new List<bool>();
-            bool isPresent = true;
-            int processed = 0;
-
-            //For each value check, if all bits in ranges of hashes bits are set
-            foreach (var item in processResults)
-            {
-                if (!item) isPresent = false;
-                if ((processed + 1) % Statistics.K == 0)
-                {
-                    results.Add(isPresent);
-                    isPresent = true;
-                }
-                processed++;
-            }
-
-            return results;
+            return _bits.TestGroups(hashes);
         }
 
         public Task<ICollection<bool>> ContainsAsync(IEnumerable<byte[]> elements)

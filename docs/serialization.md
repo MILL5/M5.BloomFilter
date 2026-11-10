@@ -1,5 +1,10 @@
 # Serialization and version 2 migration
 
+Version 2.1.0 does not change hashing, key encoding or any persisted format.
+Snapshots written by 2.0.x load in 2.1.0 and the reverse; the test suite checks
+both directions against fixtures written by the published 2.0.1 packages. A
+union made with `Union` or `UnionWith` serializes like any other filter.
+
 A saved filter needs its bits, hash identity, sizing metadata and hash format.
 Serializing bits alone does not preserve query behavior. Companion packages are
 `M5.BloomFilter.Serialization.Json` and `M5.BloomFilter.Serialization.ProtoBuf`;

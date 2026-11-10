@@ -8,6 +8,24 @@ namespace M5.BloomFilter
 {
     public static partial class BloomFilterExtensions
     {
+        // Built-in storage when the filter is a built-in (sealed) type whose hash
+        // strategy has a span core; otherwise null and the caller takes the 2.0 path.
+        private static FilterBits Fast(IImmutableBloomFilter filter) => filter switch
+        {
+            ReadOnlyFilter snapshot => snapshot.Bits.SpanHash ? snapshot.Bits : null,
+            BloomFilter builtIn => builtIn.Bits.SpanHash ? builtIn.Bits : null,
+            _ => null,
+        };
+
+        // The same little-endian bytes Encode(object) produces, without boxing.
+        private static ReadOnlySpan<byte> Bytes(Span<byte> buffer, byte value) { buffer[0] = value; return buffer; }
+        private static ReadOnlySpan<byte> Bytes(Span<byte> buffer, short value) { BinaryPrimitives.WriteInt16LittleEndian(buffer, value); return buffer; }
+        private static ReadOnlySpan<byte> Bytes(Span<byte> buffer, ushort value) { BinaryPrimitives.WriteUInt16LittleEndian(buffer, value); return buffer; }
+        private static ReadOnlySpan<byte> Bytes(Span<byte> buffer, int value) { BinaryPrimitives.WriteInt32LittleEndian(buffer, value); return buffer; }
+        private static ReadOnlySpan<byte> Bytes(Span<byte> buffer, uint value) { BinaryPrimitives.WriteUInt32LittleEndian(buffer, value); return buffer; }
+        private static ReadOnlySpan<byte> Bytes(Span<byte> buffer, long value) { BinaryPrimitives.WriteInt64LittleEndian(buffer, value); return buffer; }
+        private static ReadOnlySpan<byte> Bytes(Span<byte> buffer, ulong value) { BinaryPrimitives.WriteUInt64LittleEndian(buffer, value); return buffer; }
+
         private static byte[] Encode(object value)
         {
             ArgumentNullException.ThrowIfNull(value);
