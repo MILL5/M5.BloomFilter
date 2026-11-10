@@ -9,6 +9,8 @@
 - EGM runtime is project-local in `.agents/`; author designs in `docs/designs/`, use fresh-context Goldfish reviewers, resolve material findings before implementation.
 - EGM artifact directory: docs/designs
 - Branch flow: create feature branches from `develop`, open PRs to `develop`, then promote `develop` to `main` by merge PR. Never push directly to either protected branch; retain `develop` after promotion. GitHub Copilot reviews PRs to `develop` automatically.
+- Never wait for nuget.org to index a release. After the publish workflow succeeds, check the version indexes once, report what is listed, and carry on.
 - Keep project agent guidance in AGENTS.md only. Never rebase, add AI commit attribution, or manually request PR reviews.
 - GitHub Pages must use verified MILL5 and Richard Crane MVP branding, accurate technical copy, accessible HTML, and maintained search/answer metadata.
+- The page must always have a working link preview: Open Graph and Twitter card tags with a real 1200x630 image (`docs/site/assets/social-card.png`, rendered from `social-card.html`). Re-render the image when the headline or figures change, and run `node tools/SiteFilter/check-page.mjs` before shipping page changes.
 - License: PolyForm Strict 1.0.0 for MILL5-owned work; preserve third-party licenses and historical release terms. Describe this release as source-available.

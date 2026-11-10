@@ -100,9 +100,9 @@ Regression tests cover all hash strategies, independent Murmur vectors, frozen
 format vectors, false-positive rates, concurrent readers and writers, snapshots,
 collection encoding, populated persistence, and malformed bit streams.
 
-Two tool projects sit outside the solution, are never packed, and are run by
+Three tool projects sit outside the solution, are never packed, and are run by
 hand: `tools/V201Oracle` writes the compatibility fixtures from the published
-2.0.1 packages, and `benchmarks/M5.BloomFilter.Benchmarks` produces
+2.0.1 packages, `tools/SiteFilter` builds the snapshot the website queries, and `benchmarks/M5.BloomFilter.Benchmarks` produces
 [docs/benchmarks.md](docs/benchmarks.md).
 
 ## Version 2 migration

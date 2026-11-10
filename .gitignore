@@ -351,3 +351,6 @@ MigrationBackup/
 
 # Local Impeccable browser review evidence
 .impeccable/review/
+
+# Editor settings
+.vscode/

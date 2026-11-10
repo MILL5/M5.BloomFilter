@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>M5.BloomFilter social card source (1200 x 630)</title>
+<!-- Source of social-card.png. Render at 1200x630 with headless Chrome; see tools/SiteFilter/README.md. -->
+<link rel="stylesheet" href="../style.css">
+<style>
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body { display: grid; place-items: center; }
+  .card { position: relative; width: 1100px; height: 485px; background: var(--manila) var(--grain); clip-path: polygon(38px 0, 100% 0, 100% 100%, 0 100%, 0 66px); }
+  .wrap { filter: drop-shadow(0 2px 0 rgb(3 18 36 / 0.45)) drop-shadow(0 16px 22px rgb(3 18 36 / 0.35)); }
+  .top { position: absolute; left: 64px; right: 44px; top: 30px; display: flex; align-items: center; gap: 22px; }
+  .top img { width: 150px; height: auto; }
+  .top b { font: 600 30px/1 var(--condensed); }
+  .top span { margin-left: auto; font: 500 21px/1 var(--condensed); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+  h1 { position: absolute; left: 44px; right: 40px; top: 96px; margin: 0; max-width: none; font: 800 84px/0.97 var(--condensed); letter-spacing: -0.012em; }
+  canvas { position: absolute; left: 0; bottom: 0; width: 1100px; height: 180px; }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="top"><img src="mill5-logo.png" alt="MILL5"><b>M5.BloomFilter</b><span>A Bloom filter for .NET 10</span></div>
+  <h1>This page knows 172,823 English words and stores none of them.</h1>
+  <canvas id="holes" width="2200" height="360"></canvas>
+</div></div>
+<script src="../bloom.js"></script>
+<script>
+// The bottom rows of a real card from the deck: card 751, the last one "bloom" needs.
+fetch('../words.json').then(function (r) { return r.json(); }).then(function (snapshot) {
+  var filter = Bloom.load(snapshot), canvas = document.getElementById('holes'), ctx = canvas.getContext('2d');
+  var style = getComputedStyle(document.documentElement);
+  var W = canvas.width, s = W / 7.375, rows = 4, base = 750 * 960;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '500 ' + Math.round(0.118 * s) + 'px "Barlow Condensed", sans-serif';
+  for (var row = 0; row < rows; row++) {
+    var y = (0.19 + 0.25 * row) * s;
+    for (var column = 0; column < 80; column++) {
+      var x = (0.2515 + 0.087 * column) * s;
+      if (filter.bit(base + column * 12 + (8 + row))) {
+        ctx.fillStyle = style.getPropertyValue('--tray').trim();
+        ctx.fillRect(x - 0.0275 * s, y - 0.0625 * s, 0.055 * s, 0.125 * s);
+      } else {
+        ctx.fillStyle = style.getPropertyValue('--form-ink').trim();
+        ctx.fillText(String(6 + row), x, y);
+      }
+    }
+  }
+  document.title = 'ready';
+});
+</script>
+</body>
+</html>
