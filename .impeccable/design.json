@@ -1,0 +1,673 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T00:00:00Z",
+  "title": "Design System: M5.BloomFilter",
+  "extensions": {
+    "colorMeta": {
+      "tray": {
+        "role": "primary",
+        "displayName": "Tray Blue",
+        "canonical": "#0b4c8c",
+        "tonalRamp": [
+          "oklch(15% 0.059 253)",
+          "oklch(27% 0.078 253)",
+          "oklch(39% 0.097 253)",
+          "oklch(51% 0.116 253)",
+          "oklch(63% 0.110 253)",
+          "oklch(75% 0.090 253)",
+          "oklch(86% 0.073 253)",
+          "oklch(95% 0.059 253)"
+        ]
+      },
+      "tray-deep": {
+        "role": "primary",
+        "displayName": "Deep Tray",
+        "canonical": "#083a6d",
+        "tonalRamp": [
+          "oklch(15% 0.049 254)",
+          "oklch(27% 0.065 254)",
+          "oklch(39% 0.080 254)",
+          "oklch(51% 0.096 254)",
+          "oklch(63% 0.091 254)",
+          "oklch(75% 0.075 254)",
+          "oklch(86% 0.061 254)",
+          "oklch(95% 0.049 254)"
+        ]
+      },
+      "tray-text": {
+        "role": "primary",
+        "displayName": "Tray Text",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(27% 0.000 90)",
+          "oklch(39% 0.000 90)",
+          "oklch(51% 0.000 90)",
+          "oklch(63% 0.000 90)",
+          "oklch(75% 0.000 90)",
+          "oklch(86% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "tray-soft": {
+        "role": "primary",
+        "displayName": "Tray Soft",
+        "canonical": "#cfe0f3",
+        "tonalRamp": [
+          "oklch(15% 0.015 251)",
+          "oklch(27% 0.020 251)",
+          "oklch(39% 0.025 251)",
+          "oklch(51% 0.030 251)",
+          "oklch(63% 0.029 251)",
+          "oklch(75% 0.024 251)",
+          "oklch(86% 0.019 251)",
+          "oklch(95% 0.015 251)"
+        ]
+      },
+      "manila": {
+        "role": "secondary",
+        "displayName": "Manila",
+        "canonical": "#e7d6a3",
+        "tonalRamp": [
+          "oklch(15% 0.033 92)",
+          "oklch(27% 0.044 92)",
+          "oklch(39% 0.055 92)",
+          "oklch(51% 0.065 92)",
+          "oklch(63% 0.062 92)",
+          "oklch(75% 0.051 92)",
+          "oklch(86% 0.041 92)",
+          "oklch(95% 0.033 92)"
+        ]
+      },
+      "manila-light": {
+        "role": "secondary",
+        "displayName": "Manila Light",
+        "canonical": "#f3e8c4",
+        "tonalRamp": [
+          "oklch(15% 0.023 93)",
+          "oklch(27% 0.031 93)",
+          "oklch(39% 0.038 93)",
+          "oklch(51% 0.046 93)",
+          "oklch(63% 0.044 93)",
+          "oklch(75% 0.036 93)",
+          "oklch(86% 0.029 93)",
+          "oklch(95% 0.023 93)"
+        ]
+      },
+      "manila-edge": {
+        "role": "secondary",
+        "displayName": "Manila Edge",
+        "canonical": "#c2ad72",
+        "tonalRamp": [
+          "oklch(15% 0.039 91)",
+          "oklch(27% 0.052 91)",
+          "oklch(39% 0.064 91)",
+          "oklch(51% 0.077 91)",
+          "oklch(63% 0.073 91)",
+          "oklch(75% 0.060 91)",
+          "oklch(86% 0.048 91)",
+          "oklch(95% 0.039 91)"
+        ]
+      },
+      "form-ink": {
+        "role": "secondary",
+        "displayName": "Form Ink",
+        "canonical": "#8b7a4a",
+        "tonalRamp": [
+          "oklch(15% 0.033 91)",
+          "oklch(27% 0.044 91)",
+          "oklch(39% 0.055 91)",
+          "oklch(51% 0.066 91)",
+          "oklch(63% 0.062 91)",
+          "oklch(75% 0.051 91)",
+          "oklch(86% 0.041 91)",
+          "oklch(95% 0.033 91)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Fan-fold Paper",
+        "canonical": "#f4f6f0",
+        "tonalRamp": [
+          "oklch(15% 0.004 122)",
+          "oklch(27% 0.005 122)",
+          "oklch(39% 0.006 122)",
+          "oklch(51% 0.008 122)",
+          "oklch(63% 0.007 122)",
+          "oklch(75% 0.006 122)",
+          "oklch(86% 0.005 122)",
+          "oklch(95% 0.004 122)"
+        ]
+      },
+      "paper-edge": {
+        "role": "neutral",
+        "displayName": "Paper Edge",
+        "canonical": "#cfd6c8",
+        "tonalRamp": [
+          "oklch(15% 0.010 129)",
+          "oklch(27% 0.013 129)",
+          "oklch(39% 0.016 129)",
+          "oklch(51% 0.019 129)",
+          "oklch(63% 0.018 129)",
+          "oklch(75% 0.015 129)",
+          "oklch(86% 0.012 129)",
+          "oklch(95% 0.010 129)"
+        ]
+      },
+      "bar": {
+        "role": "neutral",
+        "displayName": "Green Bar",
+        "canonical": "#dbe9d2",
+        "tonalRamp": [
+          "oklch(15% 0.016 133)",
+          "oklch(27% 0.022 133)",
+          "oklch(39% 0.027 133)",
+          "oklch(51% 0.032 133)",
+          "oklch(63% 0.031 133)",
+          "oklch(75% 0.025 133)",
+          "oklch(86% 0.020 133)",
+          "oklch(95% 0.016 133)"
+        ]
+      },
+      "salmon": {
+        "role": "tertiary",
+        "displayName": "Salmon",
+        "canonical": "#f1b79e",
+        "tonalRamp": [
+          "oklch(15% 0.036 44)",
+          "oklch(27% 0.048 44)",
+          "oklch(39% 0.060 44)",
+          "oklch(51% 0.072 44)",
+          "oklch(63% 0.068 44)",
+          "oklch(75% 0.056 44)",
+          "oklch(86% 0.045 44)",
+          "oklch(95% 0.036 44)"
+        ]
+      },
+      "salmon-edge": {
+        "role": "tertiary",
+        "displayName": "Salmon Edge",
+        "canonical": "#c98a70",
+        "tonalRamp": [
+          "oklch(15% 0.041 43)",
+          "oklch(27% 0.055 43)",
+          "oklch(39% 0.068 43)",
+          "oklch(51% 0.082 43)",
+          "oklch(63% 0.077 43)",
+          "oklch(75% 0.064 43)",
+          "oklch(86% 0.051 43)",
+          "oklch(95% 0.041 43)"
+        ]
+      },
+      "salmon-ink": {
+        "role": "tertiary",
+        "displayName": "Salmon Ink",
+        "canonical": "#4a2a1e",
+        "tonalRamp": [
+          "oklch(15% 0.025 41)",
+          "oklch(27% 0.033 41)",
+          "oklch(39% 0.041 41)",
+          "oklch(51% 0.049 41)",
+          "oklch(63% 0.047 41)",
+          "oklch(75% 0.039 41)",
+          "oklch(86% 0.031 41)",
+          "oklch(95% 0.025 41)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#14212b",
+        "tonalRamp": [
+          "oklch(15% 0.013 242)",
+          "oklch(27% 0.017 242)",
+          "oklch(39% 0.021 242)",
+          "oklch(51% 0.025 242)",
+          "oklch(63% 0.024 242)",
+          "oklch(75% 0.020 242)",
+          "oklch(86% 0.016 242)",
+          "oklch(95% 0.013 242)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "#3b4a56",
+        "tonalRamp": [
+          "oklch(15% 0.013 243)",
+          "oklch(27% 0.018 243)",
+          "oklch(39% 0.022 243)",
+          "oklch(51% 0.026 243)",
+          "oklch(63% 0.025 243)",
+          "oklch(75% 0.021 243)",
+          "oklch(86% 0.017 243)",
+          "oklch(95% 0.013 243)"
+        ]
+      },
+      "slate": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "#5d6770",
+        "tonalRamp": [
+          "oklch(15% 0.009 245)",
+          "oklch(27% 0.012 245)",
+          "oklch(39% 0.015 245)",
+          "oklch(51% 0.018 245)",
+          "oklch(63% 0.017 245)",
+          "oklch(75% 0.014 245)",
+          "oklch(86% 0.011 245)",
+          "oklch(95% 0.009 245)"
+        ]
+      },
+      "comment-ink": {
+        "role": "neutral",
+        "displayName": "Comment Ink",
+        "canonical": "#5b4d27",
+        "tonalRamp": [
+          "oklch(15% 0.028 90)",
+          "oklch(27% 0.037 90)",
+          "oklch(39% 0.046 90)",
+          "oklch(51% 0.055 90)",
+          "oklch(63% 0.052 90)",
+          "oklch(75% 0.043 90)",
+          "oklch(86% 0.035 90)",
+          "oklch(95% 0.028 90)"
+        ]
+      },
+      "pencil": {
+        "role": "tertiary",
+        "displayName": "Grease Pencil",
+        "canonical": "#ab1f17",
+        "tonalRamp": [
+          "oklch(15% 0.085 29)",
+          "oklch(27% 0.112 29)",
+          "oklch(39% 0.140 29)",
+          "oklch(51% 0.167 29)",
+          "oklch(63% 0.158 29)",
+          "oklch(75% 0.130 29)",
+          "oklch(86% 0.105 29)",
+          "oklch(95% 0.085 29)"
+        ]
+      },
+      "key": {
+        "role": "neutral",
+        "displayName": "Keycap",
+        "canonical": "#1b2b3a",
+        "tonalRamp": [
+          "oklch(15% 0.017 248)",
+          "oklch(27% 0.022 248)",
+          "oklch(39% 0.028 248)",
+          "oklch(51% 0.033 248)",
+          "oklch(63% 0.031 248)",
+          "oklch(75% 0.026 248)",
+          "oklch(86% 0.021 248)",
+          "oklch(95% 0.017 248)"
+        ]
+      },
+      "key-hover": {
+        "role": "neutral",
+        "displayName": "Keycap Hover",
+        "canonical": "#26394b",
+        "tonalRamp": [
+          "oklch(15% 0.019 248)",
+          "oklch(27% 0.026 248)",
+          "oklch(39% 0.032 248)",
+          "oklch(51% 0.038 248)",
+          "oklch(63% 0.036 248)",
+          "oklch(75% 0.030 248)",
+          "oklch(86% 0.024 248)",
+          "oklch(95% 0.019 248)"
+        ]
+      },
+      "key-text": {
+        "role": "neutral",
+        "displayName": "Key Text",
+        "canonical": "#f6f0dc",
+        "tonalRamp": [
+          "oklch(15% 0.013 93)",
+          "oklch(27% 0.017 93)",
+          "oklch(39% 0.021 93)",
+          "oklch(51% 0.026 93)",
+          "oklch(63% 0.024 93)",
+          "oklch(75% 0.020 93)",
+          "oklch(86% 0.016 93)",
+          "oklch(95% 0.013 93)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The single h1 on the header card."
+      },
+      "verdict": {
+        "displayName": "Verdict",
+        "purpose": "The filter's answer, white on the tray."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section h2 on sheets and cards."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "h3, panel headings, FAQ questions."
+      },
+      "standfirst": {
+        "displayName": "Standfirst",
+        "purpose": "The sentence under the headline and the reason under the verdict."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text on card and paper."
+      },
+      "fine": {
+        "displayName": "Fine",
+        "purpose": "Notes, citations, benchmark conditions, footer."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase card legends, field labels, listing column heads."
+      },
+      "key": {
+        "displayName": "Key",
+        "purpose": "Uppercase lettering on a keycap."
+      },
+      "typed": {
+        "displayName": "Typed",
+        "purpose": "What the visitor types into a card field."
+      },
+      "listing": {
+        "displayName": "Listing",
+        "purpose": "Printout data with tabular figures, one line per row."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "C# samples on manila."
+      }
+    },
+    "shadows": [
+      {
+        "name": "lift",
+        "value": "drop-shadow(0 1px 0 rgb(3 18 36 / 0.45)) drop-shadow(0 10px 14px rgb(3 18 36 / 0.3))",
+        "purpose": "CSS filter on the wrapper of a clipped card or a fan-fold run lying on the tray."
+      },
+      {
+        "name": "lift-social",
+        "value": "drop-shadow(0 2px 0 rgb(3 18 36 / 0.45)) drop-shadow(0 16px 22px rgb(3 18 36 / 0.35))",
+        "purpose": "The same lift at the 1200 by 630 social card size."
+      },
+      {
+        "name": "focus-halo",
+        "value": "0 0 0 8px #14212b",
+        "purpose": "Ink halo outside the 3px white focus outline (offset 2px), so focus reads on tray, card and paper."
+      },
+      {
+        "name": "current-row",
+        "value": "inset 0 -2px 0 #14212b, inset 0 2px 0 #14212b",
+        "purpose": "Ruled lines around the listing row whose card is showing."
+      }
+    ],
+    "motion": [
+      {
+        "name": "feed",
+        "value": "200ms cubic-bezier(0.16, 1, 0.3, 1); from translate(4%, -3%) rotate(0.5deg) opacity 0.25",
+        "purpose": "A card arriving in the reader."
+      },
+      {
+        "name": "feed-interval",
+        "value": "210ms",
+        "purpose": "Delay between successive cards when a submitted word is fed; stops on the deciding card."
+      },
+      {
+        "name": "key-press",
+        "value": "transform 80ms ease-out (translateY(2px) on :active)",
+        "purpose": "A key sinking."
+      },
+      {
+        "name": "key-hover",
+        "value": "background-color 120ms ease-out",
+        "purpose": "Keycap hover."
+      },
+      {
+        "name": "faq-chevron",
+        "value": "transform 140ms ease-out",
+        "purpose": "The details chevron turning."
+      },
+      {
+        "name": "status-clear",
+        "value": "4000ms",
+        "purpose": "How long the copy status text stays."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation: none; transition: none; scroll-behavior: auto",
+        "purpose": "With prefers-reduced-motion the deciding card is shown at once and nothing animates."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "answer-stack",
+        "value": "1020px"
+      },
+      {
+        "name": "spread-stack",
+        "value": "1000px"
+      },
+      {
+        "name": "controls-stack",
+        "value": "860px"
+      },
+      {
+        "name": "card-window",
+        "value": "620px"
+      },
+      {
+        "name": "tight-listing",
+        "value": "380px"
+      }
+    ],
+    "canvas": {
+      "card": {
+        "proportion": "7.375 / 3.25",
+        "columns": 80,
+        "rows": 12,
+        "bitsPerCard": 960,
+        "columnPitchIn": 0.087,
+        "firstColumnIn": 0.2515,
+        "rowPitchIn": 0.25,
+        "firstRowIn": 0.25,
+        "holeIn": "0.055 x 0.125",
+        "cornerCut": "3.39% across, 13.3% down",
+        "maxDevicePixelRatio": 3,
+        "digitsFromColumnPitchPx": 5.5,
+        "columnNumbersFromColumnPitchPx": 11,
+        "windowColumns": 30,
+        "windowBelowCanvasWidthPx": 620,
+        "windowFrameProportion": "2.766 / 3.25"
+      },
+      "deckStrip": {
+        "heightPx": 84,
+        "heightBelow620Px": 76,
+        "deckBandPx": 28,
+        "edgeLineEveryPx": 3,
+        "raisedCardWidthPx": 6,
+        "raisePx": [
+          14,
+          28
+        ],
+        "labelPx": 13
+      }
+    },
+    "assets": [
+      {
+        "name": "MILL5 logo",
+        "path": "docs/site/assets/mill5-logo.png",
+        "note": "557 by 108. Shown at 118px wide on the print line and 150px on the social card."
+      },
+      {
+        "name": "Richard Crane portrait",
+        "path": "docs/site/assets/richard-crane.jpg",
+        "note": "400 by 400. Imprint card only."
+      },
+      {
+        "name": "NuGet package icon",
+        "path": "M5.BloomFilter/bitarray_400-min.png",
+        "note": "Source of docs/site/assets/icon-64.png and icon-180.png."
+      },
+      {
+        "name": "Social card",
+        "path": "docs/site/assets/social-card.png",
+        "note": "Rendered at 1200 by 630 from docs/site/assets/social-card.html."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Key",
+      "kind": "button",
+      "refersTo": "key",
+      "description": "The primary control: a flat ink keycap that sinks 2px when pressed.",
+      "html": "<button class=\"ds-key\">Read the cards</button>",
+      "css": ".ds-key { min-height: 56px; padding: 0 22px; font: 600 1.125rem/1 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: 0.07em; text-transform: uppercase; color: var(--key-text, #f6f0dc); background: var(--key, #1b2b3a); border: 0; border-radius: 5px; cursor: pointer; transition: transform 80ms ease-out, background-color 120ms ease-out; } .ds-key:hover { background: #26394b; } .ds-key:active { transform: translateY(2px); } .ds-key:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 8px var(--ink, #14212b); } .ds-key[disabled] { background: #5d6770; cursor: default; }"
+    },
+    {
+      "name": "Small Key",
+      "kind": "button",
+      "refersTo": "key-small",
+      "description": "Secondary key, used for Copy beside the install command.",
+      "html": "<button class=\"ds-key-small\">Copy</button>",
+      "css": ".ds-key-small { min-height: 44px; padding: 0 16px; font: 600 1rem/1 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: 0.07em; text-transform: uppercase; color: var(--key-text, #f6f0dc); background: var(--key, #1b2b3a); border: 0; border-radius: 5px; cursor: pointer; transition: transform 80ms ease-out, background-color 120ms ease-out; } .ds-key-small:hover { background: #26394b; } .ds-key-small:active { transform: translateY(2px); } .ds-key-small:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 8px var(--ink, #14212b); }"
+    },
+    {
+      "name": "Card Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "A field printed on a manila card, with its legend above. Monospace, pencil-red caret.",
+      "html": "<div class=\"ds-ask\"><label class=\"ds-legend\" for=\"ds-word\">Type a word. The reader pulls its seven cards.</label><input class=\"ds-field\" id=\"ds-word\" type=\"text\" placeholder=\"bloom\"></div>",
+      "css": ".ds-ask { display: grid; gap: 8px; padding: 18px; background: var(--manila, #e7d6a3) var(--grain, none); } .ds-legend { font: 500 0.8125rem/1.2 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft, #3b4a56); } .ds-field { width: 100%; min-height: 56px; padding: 8px 14px; font: 400 1.375rem/1.2 var(--mono, ui-monospace, Consolas, Menlo, monospace); background: var(--manila-light, #f3e8c4); color: var(--ink, #14212b); border: 2px solid var(--ink, #14212b); border-radius: 2px; caret-color: var(--pencil, #ab1f17); } .ds-field::placeholder { color: #5d6770; opacity: 1; } .ds-field:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 8px var(--ink, #14212b); }"
+    },
+    {
+      "name": "Print Line",
+      "kind": "nav",
+      "refersTo": "card-stock",
+      "description": "Navigation printed along the top of the header card, closed by a manila-edge rule. The real page puts the MILL5 logo file at the left; no mark is drawn here.",
+      "html": "<div class=\"ds-print-line\"><a class=\"ds-product\" href=\"#\">M5.BloomFilter</a><nav><a href=\"#\">Fool it</a><a href=\"#\">Size one</a><a href=\"#\">Install</a><a href=\"#\">Limits</a></nav></div>",
+      "css": ".ds-print-line { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding: 14px 18px; background: var(--manila, #e7d6a3) var(--grain, none); border-bottom: 1px solid var(--manila-edge, #c2ad72); color: var(--ink, #14212b); } .ds-print-line a { color: inherit; text-decoration: none; } .ds-product { font: 600 1.25rem/1 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: 0.01em; padding: 6px 0; } .ds-print-line nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 20px; } .ds-print-line nav a { font: 500 1rem/1 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 0; border-bottom: 2px solid transparent; } .ds-print-line nav a:hover { border-bottom-color: var(--ink, #14212b); } .ds-print-line a:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 8px var(--ink, #14212b); }"
+    },
+    {
+      "name": "Manila Card",
+      "kind": "card",
+      "refersTo": "card-stock",
+      "description": "Card stock with grain, a sixty-degree corner cut and the lift shadow on its wrapper.",
+      "html": "<div class=\"ds-tray\"><div class=\"ds-lift\"><div class=\"ds-stock\"><h2>Built by Richard Crane at MILL5.</h2><p>Microsoft MVP and founder of MILL5.</p></div></div></div>",
+      "css": ".ds-tray { padding: 24px; background: var(--tray, #0b4c8c); } .ds-lift { filter: drop-shadow(0 1px 0 rgb(3 18 36 / 0.45)) drop-shadow(0 10px 14px rgb(3 18 36 / 0.3)); } .ds-stock { --ds-corner: 24px; padding: 28px 32px; background: var(--manila, #e7d6a3) var(--grain, none); color: var(--ink, #14212b); clip-path: polygon(var(--ds-corner) 0, 100% 0, 100% 100%, 0 100%, 0 calc(var(--ds-corner) * 1.73)); } .ds-stock h2 { margin: 0; font: 600 2.2rem/1.04 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: -0.005em; } .ds-stock p { margin: 10px 0 0; font: 400 1.125rem/1.6 var(--text, Barlow, \"Segoe UI\", sans-serif); }"
+    },
+    {
+      "name": "Limits Card",
+      "kind": "card",
+      "refersTo": "card-limits",
+      "description": "The one salmon card: limits as ruled items, signed with an edge legend.",
+      "html": "<div class=\"ds-tray-s\"><div class=\"ds-lift-s\"><div class=\"ds-salmon\"><h2>Do not fold, spindle or mutilate</h2><ol><li><h3>A yes is a maybe.</h3><p>Confirm it against the data that knows.</p></li><li><h3>There is no delete.</h3><p>A hole cannot be unpunched.</p></li></ol><p class=\"ds-legend-s\">MILL5 · M5.BloomFilter 2.1 · eighty columns, twelve rows</p></div></div></div>",
+      "css": ".ds-tray-s { padding: 24px; background: var(--tray, #0b4c8c); } .ds-lift-s { filter: drop-shadow(0 1px 0 rgb(3 18 36 / 0.45)) drop-shadow(0 10px 14px rgb(3 18 36 / 0.3)); } .ds-salmon { padding: 30px 34px; background: var(--salmon, #f1b79e) var(--grain, none); color: var(--ink, #14212b); clip-path: polygon(24px 0, 100% 0, 100% 100%, 0 100%, 0 41.5px); } .ds-salmon h2 { margin: 0; max-width: 16ch; font: 600 2.2rem/1.04 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); } .ds-salmon ol { margin: 22px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 40px; } .ds-salmon li { border-top: 1px solid var(--salmon-edge, #c98a70); padding-top: 12px; } .ds-salmon h3 { margin: 0; font: 600 1.375rem/1.2 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); } .ds-salmon li p { margin: 4px 0 0; font: 400 1.125rem/1.6 var(--text, Barlow, \"Segoe UI\", sans-serif); } .ds-legend-s { margin: 26px 0 0; font: 500 0.8125rem/1.2 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: 0.06em; text-transform: uppercase; color: #4a2a1e; }"
+    },
+    {
+      "name": "Fan-fold Sheet",
+      "kind": "custom",
+      "refersTo": "fanfold-sheet",
+      "description": "Printout paper with sprocket margins in tray blue and a dashed perforation between sheets.",
+      "html": "<div class=\"ds-fanfold\"><section class=\"ds-sheet\"><h2>Now try to fool it</h2><p>A filter never turns away a word it was given.</p></section><section class=\"ds-sheet\"><h2>Size your own deck</h2><p>You choose two numbers.</p></section></div>",
+      "css": ".ds-fanfold { --ds-feed: 32px; position: relative; background: var(--paper, #f4f6f0); padding-inline: var(--ds-feed); color: var(--ink, #14212b); } .ds-fanfold::before, .ds-fanfold::after { content: \"\"; position: absolute; top: 0; bottom: 0; width: var(--ds-feed); background: radial-gradient(circle at 50% 50%, var(--tray, #0b4c8c) 0 calc(var(--ds-feed) * 0.2), transparent calc(var(--ds-feed) * 0.2 + 0.6px)) 0 0 / 100% 44px repeat-y; } .ds-fanfold::before { left: 0; border-right: 1px dashed var(--paper-edge, #cfd6c8); } .ds-fanfold::after { right: 0; border-left: 1px dashed var(--paper-edge, #cfd6c8); } .ds-sheet { padding: 40px 28px 34px; } .ds-sheet + .ds-sheet { border-top: 2px dashed var(--paper-edge, #cfd6c8); } .ds-sheet h2 { margin: 0; font: 600 2.2rem/1.04 var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: -0.005em; } .ds-sheet p { margin: 18px 0 0; max-width: 34rem; font: 400 1.125rem/1.6 var(--text, Barlow, \"Segoe UI\", sans-serif); }"
+    },
+    {
+      "name": "Listing",
+      "kind": "custom",
+      "refersTo": "listing",
+      "description": "Green-bar printout table: one printout line per row, bars three lines on and three off, BLANK in pencil red, the row number recalls its card.",
+      "html": "<div class=\"ds-listing\"><table><caption>The seven holes</caption><thead><tr><th scope=\"col\">Hole</th><th scope=\"col\">Bit</th><th scope=\"col\">Card</th><th scope=\"col\">Col</th><th scope=\"col\">Row</th><th scope=\"col\" class=\"ds-state\">State</th></tr></thead><tbody><tr><th scope=\"row\"><button class=\"ds-recall\">1</button></th><td>1,204,113</td><td>1,255</td><td>24</td><td>7</td><td class=\"ds-state\">punched</td></tr><tr aria-current=\"true\"><th scope=\"row\"><button class=\"ds-recall\">2</button></th><td>720,431</td><td>751</td><td>37</td><td>9</td><td class=\"ds-state ds-blank\">BLANK</td></tr><tr><th scope=\"row\"><button class=\"ds-recall\">3</button></th><td>88,902</td><td>93</td><td>49</td><td>4</td><td class=\"ds-state\">punched</td></tr></tbody></table></div>",
+      "css": ".ds-listing { --ds-line: 1.6rem; --ds-bars: repeating-linear-gradient(to bottom, var(--bar, #dbe9d2) 0 calc(var(--ds-line) * 3), transparent calc(var(--ds-line) * 3) calc(var(--ds-line) * 6)); background: var(--paper, #f4f6f0) var(--ds-bars) 0 var(--ds-line) no-repeat; color: var(--ink, #14212b); font: 400 0.9375rem/var(--ds-line) var(--mono, ui-monospace, Consolas, Menlo, monospace); font-variant-numeric: tabular-nums; overflow-x: auto; } .ds-listing table { width: 100%; border-collapse: collapse; } .ds-listing caption { text-align: left; padding: 0 14px; font: 600 1rem/var(--ds-line) var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: 0.05em; text-transform: uppercase; background: var(--paper, #f4f6f0); } .ds-listing th, .ds-listing td { padding: 0 14px; height: var(--ds-line); text-align: right; font-weight: 400; white-space: nowrap; } .ds-listing th:first-child { text-align: left; } .ds-listing thead th { font: 500 0.8125rem/var(--ds-line) var(--condensed, \"Barlow Condensed\", \"Arial Narrow\", sans-serif); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft, #3b4a56); } .ds-listing .ds-state { text-align: left; } .ds-listing .ds-blank { color: var(--pencil, #ab1f17); font-weight: 700; } .ds-listing tr[aria-current=\"true\"] td { box-shadow: inset 0 -2px 0 var(--ink, #14212b), inset 0 2px 0 var(--ink, #14212b); } .ds-recall { all: unset; cursor: pointer; display: block; width: 100%; text-decoration: underline; text-underline-offset: 0.2em; } .ds-recall:focus-visible { outline: 3px solid var(--ink, #14212b); outline-offset: 0; }"
+    },
+    {
+      "name": "Code Block",
+      "kind": "custom",
+      "refersTo": "code-block",
+      "description": "C# on manila under a 3px ink rule; comments in comment ink.",
+      "html": "<pre class=\"ds-code\" tabindex=\"0\"><code><span class=\"ds-c\">// A no is certain: skip the database.</span>\nif (!seen.Contains(\"customer:43\"))\n    return NotFound();</code></pre>",
+      "css": ".ds-code { margin: 0; padding: 14px 16px; overflow-x: auto; background: var(--manila, #e7d6a3) var(--grain, none); color: var(--ink, #14212b); border-top: 3px solid var(--ink, #14212b); font: 400 0.875rem/1.65 var(--mono, ui-monospace, Consolas, Menlo, monospace); tab-size: 4; } .ds-code .ds-c { color: #5b4d27; } .ds-code:focus-visible { outline: 3px solid var(--ink, #14212b); outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "A made-up word that got through the filter; pressing it reads its cards again.",
+      "html": "<ul class=\"ds-chips\"><li><button class=\"ds-chip\">qvxlorp</button></li><li><button class=\"ds-chip\">zzanthu</button></li></ul>",
+      "css": ".ds-chips { list-style: none; margin: 0; padding: 12px; display: flex; flex-wrap: wrap; gap: 8px; background: var(--paper, #f4f6f0); } .ds-chip { min-height: 44px; padding: 0 12px; font: 400 0.9375rem/1 var(--mono, ui-monospace, Consolas, Menlo, monospace); color: var(--ink, #14212b); background: var(--manila, #e7d6a3) var(--grain, none); border: 1px solid var(--ink, #14212b); border-radius: 2px; cursor: pointer; } .ds-chip:hover { background-color: var(--manila-light, #f3e8c4); } .ds-chip:focus-visible { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 8px var(--ink, #14212b); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Deck and the Printout",
+    "overview": "The site is a 1970 machine room seen from above. The ground is enamel blue from edge to edge. Manila punched cards lie on it, and long content runs on fan-fold printout paper with sprocket margins. A hole in a card is not drawn as a dark mark; it is the blue ground showing through. Every surface is one of three stocks (card, paper, tray) and every piece of type is one of three faces.\n\nDensity is that of a printed form: full-width cards, tables set one printout line per row, short measures of reading text beside the listing they explain. Controls are flat ink keys and printed fields. The only moving part is the reader feeding a card. Recorded from the shipped `docs/site/style.css`, `app.js` and `assets/social-card.html`.",
+    "keyCharacteristics": [
+      "Blue ground, manila cards, pale fan-fold paper. No white page.",
+      "Cards keep a real card's proportion (7.375 by 3.25) and a top-left corner cut at sixty degrees.",
+      "Holes are filled with the ground colour.",
+      "Condensed sans for headings, legends and keys; humanist sans for reading; platform monospace for code, typed input and printout data.",
+      "Red grease pencil marks a blank hole and nothing else, and always with a word beside it.",
+      "Brand marks are the real files. Nothing is drawn or generated to stand in for one."
+    ],
+    "rules": [
+      {
+        "name": "The Hole Shows Blue Rule",
+        "body": "A hole is painted in `tray`, the same colour as the ground behind the card. Never draw a hole in black, grey or a shadow.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Salmon Card Rule",
+        "body": "Salmon is the limits card. One per page.",
+        "section": "colors"
+      },
+      {
+        "name": "The Grease Pencil Rule",
+        "body": "`pencil` means a blank hole, which means \"definitely not\". It always appears with text (BLANK, the lamp sentence, the ring's tag). It is 1.2:1 against `tray`, so it is only read on card or paper.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Faces Rule",
+        "body": "Condensed is for what a form prints or a key says. Barlow is for sentences. Monospace is only for code, what the visitor types, and data a machine printed.",
+        "section": "typography"
+      },
+      {
+        "name": "The Legend Rule",
+        "body": "An uppercase legend labels a field or signs the edge of a card. It never sits above a heading as a category line.",
+        "section": "typography"
+      },
+      {
+        "name": "The Thirty-Column Window",
+        "body": "Below 620px the probe card is not shrunk. The frame changes to 2.766 by 3.25 (thirty of eighty columns), loses its corner cut, and the canvas shows thirty columns at reading size, centred on the hole in question and clamped to the card's ends. The frame proportion and the windowed drawing must switch together.",
+        "section": "layout"
+      },
+      {
+        "name": "The Lying Flat Rule",
+        "body": "Only a whole card or a whole run of fan-fold paper lifts off the tray; nothing inside one has a shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put new content on one of the three stocks: a manila card on the tray, a fan-fold sheet, or directly on the tray in white and `tray-soft`.",
+      "Do fill holes with `tray` and keep any card at 7.375 by 3.25 with eighty columns and twelve rows.",
+      "Do set tabular data in a listing with rows one `1.6rem` line tall and green bars every three lines.",
+      "Do pair every use of `pencil` with a word, and every state with text.",
+      "Do use the real brand files: `docs/site/assets/mill5-logo.png`, `docs/site/assets/richard-crane.jpg`, and the NuGet package icon `M5.BloomFilter/bitarray_400-min.png` (shipped as `icon-64.png` and `icon-180.png`).",
+      "Do render `social-card.png` from `assets/social-card.html`, which loads the site stylesheet and punches a real card from the deck."
+    ],
+    "donts": [
+      "Don't draw, generate, trace or approximate a logo, mark, portrait or icon. If an asset is missing, ask for the file.",
+      "Don't add a white or grey page background, or bring back the earlier white and lilac look.",
+      "Don't add a second salmon card or use salmon as an accent.",
+      "Don't use `pencil` for emphasis, links, errors in general or decoration, and don't place it on the tray.",
+      "Don't set readable text in `form-ink`.",
+      "Don't give controls, tables, code blocks or anything inside a card its own shadow, or round a card or sheet.",
+      "Don't set sentences in monospace or in uppercase condensed, and don't put a legend above a heading.",
+      "Don't load fonts, scripts or images from another origin."
+    ]
+  }
+}
