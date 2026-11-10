@@ -72,6 +72,27 @@ faqPage.mainEntity.forEach((entry, index) => {
 const software = jsonLd['@graph'].find(node => node['@type'] === 'SoftwareSourceCode');
 check(html.includes(`Version ${software.softwareVersion} for .NET 10`), 'softwareVersion differs from the version on the page');
 
+// 3b. The page always carries a link preview: Open Graph and Twitter card tags
+// that point at a real 1200x630 image under the canonical address.
+const meta = name => (html.match(new RegExp(`<meta (?:property|name)="${name}" content="([^"]*)"`)) ?? [])[1];
+const canonical = (html.match(/<link rel="canonical" href="([^"]+)"/) ?? [])[1];
+check(Boolean(canonical), 'missing canonical link');
+for (const name of ['og:type', 'og:site_name', 'og:title', 'og:description', 'og:url', 'og:image', 'og:image:width',
+  'og:image:height', 'og:image:alt', 'twitter:card', 'twitter:title', 'twitter:description', 'twitter:image', 'twitter:image:alt']) {
+  check(Boolean(meta(name)), `link preview tag ${name} is missing or empty`);
+}
+check(meta('og:url') === canonical, 'og:url must equal the canonical address');
+check(meta('twitter:card') === 'summary_large_image', 'twitter:card must be summary_large_image');
+check(meta('og:image') === meta('twitter:image'), 'og:image and twitter:image must be the same file');
+if (canonical && meta('og:image')?.startsWith(canonical)) {
+  try {
+    const png = readFileSync(join(site, meta('og:image').slice(canonical.length)));
+    const width = png.readUInt32BE(16), height = png.readUInt32BE(20);
+    check(png.toString('latin1', 1, 4) === 'PNG' && width === 1200 && height === 630, `preview image is ${width}x${height}; expected a 1200x630 PNG`);
+    check(String(width) === meta('og:image:width') && String(height) === meta('og:image:height'), 'og:image:width and height must match the file');
+  } catch { failures.push('preview image file is missing'); }
+} else check(false, 'og:image must be an absolute address under the canonical one');
+
 // 4. Every local file the page references exists.
 for (const match of html.matchAll(/(?:src|href)="([^"#:]+)"/g)) {
   try { readFileSync(join(site, match[1])); } catch { failures.push(`missing file ${match[1]}`); }
@@ -81,4 +102,4 @@ if (failures.length) {
   console.error(failures.map(f => 'FAIL ' + f).join('\n'));
   process.exit(1);
 }
-console.log(`ok: ${vectors.length} vectors, ${sizes.length} sizes, ${Object.keys(stats).length} figures, ${visible.length} FAQ entries, m=${filter.m} k=${filter.k}`);
+console.log(`ok: link preview, ${vectors.length} vectors, ${sizes.length} sizes, ${Object.keys(stats).length} figures, ${visible.length} FAQ entries, m=${filter.m} k=${filter.k}`);
