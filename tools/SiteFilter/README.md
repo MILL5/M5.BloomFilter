@@ -39,7 +39,12 @@ Those printed vectors live in three places that must agree:
 - the numbers quoted in `docs/site/index.html` and `docs/site/llms.txt`.
 
 If the vectors in the page and the library ever disagree, the page shows "The
-reader is out of order" instead of answering.
+filter is switched off" instead of answering.
+
+`vectors.js` also carries the size of the page's 64-bit teaching filter
+(`{ n: 14, p: 0.113, m: 64, k: 3 }`) and `loxzo`, a string that is not in the
+list and that the filter accepts: the false positive the page offers as an
+example. `SiteVectorTests` asserts both against the library.
 
 `check-nonsense.mjs` runs the page's made-up-word generator
 (`docs/site/nonsense.js`) five million times against the list and fails if it

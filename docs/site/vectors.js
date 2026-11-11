@@ -8,13 +8,16 @@ window.SITE_VECTORS = [
   { word: '', present: false, positions: [1446201, 1531357, 1616513, 43785, 128941, 214097, 299253] },
   { word: 'naïve', present: false, positions: [1165087, 484652, 1462101, 781666, 101231, 1078680, 398245] },
   { word: '😀', present: false, positions: [1371407, 215759, 717995, 1220231, 64583, 566819, 1069055] },
-  { word: 'definitelynotaword', present: false, positions: [234789, 332233, 429677, 527121, 624565, 722009, 819453] }
+  { word: 'definitelynotaword', present: false, positions: [234789, 332233, 429677, 527121, 624565, 722009, 819453] },
+  // Not a word, and the filter says it is: the false positive the page offers as an example.
+  { word: 'loxzo', present: true, positions: [860997, 643220, 425443, 207666, 1647773, 1429996, 1212219] }
 ];
 
 // Statistics(n, p) from the C# library, for the sizing calculator. A null m
 // means the library throws because the filter would exceed Int32 bits.
 window.SITE_SIZES = [
   { n: 1, p: 0.5, m: 2, k: 1 },
+  { n: 14, p: 0.113, m: 64, k: 3 },
   { n: 1000, p: 0.01, m: 9593, k: 7 },
   { n: 12345, p: 0.05, m: 77119, k: 4 },
   { n: 172823, p: 0.01, m: 1657884, k: 7 },

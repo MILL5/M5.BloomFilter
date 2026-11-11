@@ -61,10 +61,9 @@ namespace M5.BloomFilter.UnitTests
             Assert.AreEqual(snapshot.Statistics.M, built.M);
             Assert.AreEqual(snapshot.Statistics.K, built.K);
 
-            // Figures quoted on the page: 1,727 cards, 207 kB, 51.8% punched, 1.00%.
+            // Figures quoted on the page: 207 kB, 51.8% of bits on, 1.00%.
             var occupancy = snapshot.GetOccupancy();
             Assert.AreEqual(859_023, occupancy.SetBits);
-            Assert.AreEqual(1727, (snapshot.Statistics.M + 959) / 960);
             Assert.AreEqual(207_236, (snapshot.Statistics.M + 7) / 8);
             Assert.AreEqual("51.8", (occupancy.FillRatio * 100).ToString("0.0", CultureInfo.InvariantCulture));
             Assert.AreEqual("1.00", (occupancy.EstimatedFalsePositiveRate * 100).ToString("0.00", CultureInfo.InvariantCulture));
@@ -75,7 +74,7 @@ namespace M5.BloomFilter.UnitTests
         {
             var snapshot = Snapshot();
             var vectors = Vectors().ToArray();
-            Assert.AreEqual(7, vectors.Length);
+            Assert.AreEqual(8, vectors.Length);
             Assert.IsTrue(vectors.Any(vector => vector.Word == "naïve") && vectors.Any(vector => vector.Word == "\U0001F600"));
             foreach (var (word, present, positions) in vectors)
             {
@@ -89,7 +88,7 @@ namespace M5.BloomFilter.UnitTests
         public void PageSizingVectorsAreTheLibrarysStatistics()
         {
             var sizes = Sizes().ToArray();
-            Assert.AreEqual(13, sizes.Length);
+            Assert.AreEqual(14, sizes.Length);
             foreach (var (n, p, m, k) in sizes)
             {
                 if (m == null)
