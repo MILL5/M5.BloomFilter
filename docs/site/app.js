@@ -1,508 +1,572 @@
-/* The reader: loads the snapshot, answers a word, and draws the cards it read. */
+/* Loads the snapshot, answers a word, draws every bit, and runs the 64-bit grid. */
 (function () {
   'use strict';
 
   var Bloom = window.Bloom;
-  var COLUMNS = 80, ROWS = 12, PER_CARD = COLUMNS * ROWS;
-  var ROW_NAMES = ['12', '11', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  var CARD_THICKNESS_INCHES = 0.007;
-
   // Written by tools/SiteFilter and asserted in C# by SiteVectorTests.
   var VECTORS = window.SITE_VECTORS || [];
 
   var $ = function (id) { return document.getElementById(id); };
-  var input = $('word'), form = $('ask'), verdict = $('verdict'), reason = $('reason');
-  var probeFigure = $('probe'), cardCanvas = $('card'), cardCaption = $('card-caption');
-  var trayCanvas = $('tray'), probeBody = $('probe-rows'), probeCaption = $('probe-caption');
-  var reproduce = $('reproduce-code'), lamp = $('lamp');
+  var root = document.documentElement;
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
-
-  var filter = null, current = null, shown = 0, feedToken = 0, blankCard = null;
-  var palette = readPalette();
-
-  function readPalette() {
-    var style = getComputedStyle(document.documentElement);
-    function v(name) { return style.getPropertyValue(name).trim(); }
-    return {
-      tray: v('--tray'), manila: v('--manila'), edge: v('--manila-edge'), formInk: v('--form-ink'),
-      ink: v('--ink'), pencil: v('--pencil'), soft: v('--tray-soft')
-    };
-  }
+  function still() { return !!(reduceMotion && reduceMotion.matches); }
 
   function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
-  function pad(n, width) { var s = String(n); while (s.length < width) s = '0' + s; return s; }
   function quote(word) { return '“' + word + '”'; }
-
-  function locate(position) {
-    var inCard = position % PER_CARD;
-    return {
-      card: Math.floor(position / PER_CARD) + 1,
-      column: Math.floor(inCard / ROWS) + 1,
-      rowIndex: inCard % ROWS,
-      row: ROW_NAMES[inCard % ROWS],
-      inCard: inCard
-    };
+  function escapeHtml(text) {
+    return text.replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; });
   }
-
-  function cardCount() { return Math.ceil(filter.m / PER_CARD); }
-
-  /* ---------- Drawing ---------- */
-
-  function fit(canvas) {
-    var ratio = Math.min(window.devicePixelRatio || 1, 3);
-    var width = Math.max(1, Math.round(canvas.clientWidth * ratio));
-    var height = Math.max(1, Math.round(canvas.clientHeight * ratio));
-    if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
-    return { width: width, height: height, ratio: ratio };
+  function bold(word) { return '<strong>' + escapeHtml(quote(word)) + '</strong>'; }
+  function list(items) {
+    if (items.length < 2) return items.join('');
+    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
   }
-
-  // Card geometry in inches: 7 3/8 by 3 1/4, eighty columns, twelve rows.
-  function geometry(width, height) {
-    var s = width / 7.375;
-    return {
-      s: s,
-      x: function (column) { return (0.2515 + 0.087 * column) * s; },
-      y: function (row) { return (0.25 + 0.25 * row) / 3.25 * height; },
-      holeW: 0.055 * s,
-      holeH: 0.125 * s
-    };
-  }
-
-  // The unpunched card: stock, printed digits, column numbers. Cached per size.
-  function blank(width, height) {
-    if (blankCard && blankCard.width === width && blankCard.height === height) return blankCard;
-    var canvas = document.createElement('canvas');
-    canvas.width = width; canvas.height = height;
-    var ctx = canvas.getContext('2d');
-    var g = geometry(width, height);
-    ctx.fillStyle = palette.manila;
-    ctx.fillRect(0, 0, width, height);
-
-    var pitch = 0.087 * g.s;
-    if (pitch >= 5.5) {
-      ctx.fillStyle = palette.formInk;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = '500 ' + Math.round(0.118 * g.s) + 'px "Barlow Condensed", "Arial Narrow", sans-serif';
-      for (var row = 2; row < ROWS; row++) {
-        var digit = String(row - 2), y = g.y(row);
-        for (var column = 0; column < COLUMNS; column++) ctx.fillText(digit, g.x(column), y);
-      }
-      if (pitch >= 11) {
-        ctx.font = '500 ' + Math.max(6, Math.round(0.05 * g.s)) + 'px "Barlow Condensed", "Arial Narrow", sans-serif';
-        var between = (g.y(2) + g.y(3)) / 2, foot = g.y(11) + 0.135 * g.s;
-        for (var c = 0; c < COLUMNS; c++) {
-          ctx.fillText(String(c + 1), g.x(c), between);
-          ctx.fillText(String(c + 1), g.x(c), foot);
-        }
-      }
-    } else {
-      // Too small for type: print the digit rows as faint rules.
-      ctx.fillStyle = palette.formInk;
-      ctx.globalAlpha = 0.35;
-      for (var r = 2; r < ROWS; r++) ctx.fillRect(g.x(0) - pitch / 2, g.y(r) - 0.5, pitch * COLUMNS, 1);
-      ctx.globalAlpha = 1;
-    }
-    blankCard = canvas;
-    return canvas;
-  }
-
-  function paintCard(target, size, cardIndex, mark, printed) {
-    var ctx = target.getContext('2d');
-    var g = geometry(size.width, size.height);
-    ctx.drawImage(blank(size.width, size.height), 0, 0);
-
-    if (filter) {
-      ctx.fillStyle = palette.tray;
-      var base = cardIndex * PER_CARD, limit = Math.min(PER_CARD, filter.m - base);
-      for (var bit = 0; bit < limit; bit++) {
-        if (!filter.bit(base + bit)) continue;
-        var column = (bit / ROWS) | 0, row = bit % ROWS;
-        ctx.fillRect(g.x(column) - g.holeW / 2, g.y(row) - g.holeH / 2, g.holeW, g.holeH);
-      }
-    }
-
-    // The keypunch prints along the top edge.
-    var printSize = Math.max(8, Math.round(0.085 * g.s));
-    ctx.fillStyle = palette.ink;
-    ctx.textBaseline = 'middle';
-    ctx.font = '500 ' + printSize + 'px ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace';
-    ctx.textAlign = 'left';
-    if (printed) ctx.fillText(printed.slice(0, 44).toUpperCase(), g.x(3), 0.085 * g.s);
-    if (filter) {
-      ctx.textAlign = 'right';
-      ctx.fillText('CARD ' + pad(cardIndex + 1, 4) + ' OF ' + cardCount(), g.x(COLUMNS - 1) + g.holeW, 0.085 * g.s);
-    }
-
-    if (!mark) return;
-    var mc = (mark.inCard / ROWS) | 0, mr = mark.inCard % ROWS;
-    var cx = g.x(mc), cy = g.y(mr);
-    var line = Math.max(2, 0.019 * g.s);
-    ctx.strokeStyle = palette.pencil;
-    ctx.lineWidth = line * 0.5;
-    ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    ctx.moveTo(cx, 0); ctx.lineTo(cx, cy - g.holeH * 0.95);
-    ctx.moveTo(0, cy); ctx.lineTo(cx - g.holeW * 1.9, cy);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-    ctx.lineWidth = line;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, g.holeW * 1.75, g.holeH * 0.92, -0.12, 0, Math.PI * 2);
-    ctx.stroke();
-
-    var label = mark.punched ? 'PUNCHED' : 'BLANK';
-    var labelSize = Math.max(11, Math.round(0.11 * g.s));
-    ctx.font = '600 ' + labelSize + 'px "Barlow Condensed", "Arial Narrow", sans-serif';
-    var w = ctx.measureText(label).width + labelSize * 0.9, h = labelSize * 1.5;
-    var lx = cx + g.holeW * 2.4;
-    if (lx + w > size.width - 4) lx = cx - g.holeW * 2.4 - w;
-    var ly = Math.min(Math.max(cy - h / 2, 2), size.height - h - 2);
-    ctx.fillStyle = mark.punched ? palette.ink : palette.pencil;
-    ctx.fillRect(lx, ly, w, h);
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, lx + w / 2, ly + h / 2 + 1);
-  }
-
-  // On a narrow screen the whole card would be a strip of ticks, so show a
-  // window of it at reading size: thirty columns around the hole in question.
-  var WINDOW_COLUMNS = 30;
-  var windowCard = null;
-
-  function drawCard(cardIndex, mark, printed) {
-    var size = fit(cardCanvas);
-    // Must switch with the frame proportion in style.css (max-width: 620px).
-    if (!window.matchMedia('(max-width: 620px)').matches) { paintCard(cardCanvas, size, cardIndex, mark, printed); return; }
-    var full = { width: Math.round(size.width * COLUMNS / WINDOW_COLUMNS), height: size.height };
-    if (!windowCard) windowCard = document.createElement('canvas');
-    windowCard.width = full.width; windowCard.height = full.height;
-    paintCard(windowCard, full, cardIndex, mark, printed);
-    var centre = mark ? geometry(full.width, full.height).x((mark.inCard / ROWS) | 0) : 0;
-    var left = Math.min(Math.max(Math.round(centre - size.width / 2), 0), full.width - size.width);
-    cardCanvas.getContext('2d').drawImage(windowCard, left, 0, size.width, size.height, 0, 0, size.width, size.height);
-  }
-
-  // The whole deck edge-on, with the cards this word pulled.
-  function drawTray() {
-    var size = fit(trayCanvas);
-    var ctx = trayCanvas.getContext('2d');
-    var r = size.ratio, W = size.width, H = size.height;
-    ctx.clearRect(0, 0, W, H);
-    var deckTop = H - 30 * r, deckHeight = 28 * r;
-    ctx.fillStyle = palette.manila;
-    ctx.fillRect(0, deckTop, W, deckHeight);
-    ctx.fillStyle = palette.edge;
-    for (var x = 0; x < W; x += 3 * r) ctx.fillRect(x, deckTop, r, deckHeight);
-    if (!filter || !current) return;
-
-    var cards = cardCount(), lastLabel = -1e9, level = 0;
-    var order = current.positions.map(function (p, i) { return { i: i, card: Math.floor(p / PER_CARD) }; })
-      .sort(function (a, b) { return a.card - b.card; });
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = '600 ' + Math.round(13 * r) + 'px "Barlow Condensed", "Arial Narrow", sans-serif';
-    order.forEach(function (probe) {
-      var px = Math.min(Math.max((probe.card + 0.5) / cards * W, 6 * r), W - 6 * r);
-      var punched = current.set[probe.i], active = probe.i === shown;
-      level = px - lastLabel < 18 * r ? (level + 1) % 2 : 0;
-      lastLabel = px;
-      var top = deckTop - (14 + level * 14) * r;
-      ctx.fillStyle = palette.tray;
-      ctx.fillRect(px - 4.5 * r, top - r, 9 * r, deckTop + deckHeight - top + r);
-      ctx.fillStyle = active ? '#fff' : palette.manila;
-      ctx.fillRect(px - 3 * r, top, 6 * r, deckTop + deckHeight - top);
-      if (!punched) { ctx.fillStyle = palette.pencil; ctx.fillRect(px - 3 * r, top, 6 * r, 5 * r); }
-      ctx.fillStyle = active ? '#fff' : palette.soft;
-      ctx.fillText(String(probe.i + 1), px, top - 9 * r);
-    });
-  }
-
-  /* ---------- Answering ---------- */
-
-  function show(index, animate) {
-    if (!current) return;
-    shown = index;
-    var place = locate(current.positions[index]);
-    drawCard(place.card - 1, { inCard: place.inCard, punched: current.set[index] }, state.word);
-    drawTray();
-    cardCaption.innerHTML = 'Hole ' + (index + 1) + ' of ' + filter.k + ': bit <b>' + fmt(current.positions[index]) +
-      '</b>, card <b>' + fmt(place.card) + '</b>, column <b>' + place.column + '</b>, row <b>' + place.row +
-      '</b>. ' + (current.set[index] ? '<b>Punched.</b>' : '<b>Blank.</b>');
-    Array.prototype.forEach.call(probeBody.rows, function (row, i) {
-      if (i === index) row.setAttribute('aria-current', 'true'); else row.removeAttribute('aria-current');
-    });
-    if (animate && !(reduceMotion && reduceMotion.matches)) {
-      probeFigure.classList.remove('feeding');
-      void probeFigure.offsetWidth;
-      probeFigure.classList.add('feeding');
-    }
-  }
-
   function csharp(word) {
     return word.replace(/[\\"\u0000-\u001f\u007f-￿]/g, function (ch) {
       if (ch === '\\' || ch === '"') return '\\' + ch;
       return '\\u' + ('0000' + ch.charCodeAt(0).toString(16)).slice(-4);
     });
   }
+  function cssVar(name) { return getComputedStyle(root).getPropertyValue(name); }
 
-  var state = { word: '' };
+  /* ---------- The real filter ---------- */
 
-  function answer(raw, feed) {
+  var input = $('word'), form = $('ask'), verdict = $('verdict'), reason = $('reason');
+  var probeList = $('probes'), marks = $('marks'), fieldBox = $('field'), canvas = $('field-canvas');
+  var readout = $('readout'), reproduce = $('reproduce-code'), shareButton = $('share'), shareStatus = $('share-status');
+  var READOUT_IDLE = readout ? readout.textContent : '';
+  var afterRow = shareButton ? shareButton.parentNode : null, proof = document.querySelector('.proof');
+
+  var filter = null, current = null, layout = { cols: 1, rows: 1 }, token = 0;
+  var loupe = $('loupe'), loupeCells = [], LOUPE = 7;
+  var state = { word: '', decisive: -1 };
+
+  // One canvas pixel per device pixel, redrawn when the picture changes size or shape.
+  // Bits run row by row, so a phone's short wide picture holds the same bits as the square.
+  var drawn = '';
+  function drawField() {
+    if (!filter) return;
+    var box = canvas.getBoundingClientRect(), ratio = window.devicePixelRatio || 1;
+    if (!box.width || !box.height) return;
+    var shape = window.BitField.shape(filter, Math.round(box.width / box.height * 4) / 4);
+    var width = Math.max(1, Math.min(Math.round(box.width * ratio), shape.cols * 2));
+    var height = Math.max(1, Math.min(Math.round(box.height * ratio), shape.rows * 2));
+    var key = [shape.cols, width, height].join('x');
+    if (key === drawn) return;
+    drawn = key;
+    var moved = shape.cols !== layout.cols;
+    layout = shape;
+    window.BitField.paint(filter, canvas, layout, width, height, cssVar('--on'), cssVar('--off'));
+    if (moved) Array.prototype.forEach.call(marks.children, function (mark, index) { place(mark, current.positions[index]); });
+  }
+
+  function place(node, position) {
+    node.style.left = ((position % layout.cols) + 0.5) / layout.cols * 100 + '%';
+    node.style.top = (Math.floor(position / layout.cols) + 0.5) / layout.rows * 100 + '%';
+  }
+
+  // The loupe: the bits around one position, at a size where each is a cell.
+  function look(position) {
+    if (!filter || position < 0 || position >= filter.m) { loupe.hidden = true; return; }
+    var half = (LOUPE - 1) / 2, col = position % layout.cols, row = Math.floor(position / layout.cols);
+    loupeCells.forEach(function (cell, index) {
+      var x = col + (index % LOUPE) - half, y = row + Math.floor(index / LOUPE) - half, at = y * layout.cols + x;
+      var inside = x >= 0 && x < layout.cols && y >= 0 && at < filter.m;
+      var on = inside && filter.bit(at) === 1;
+      cell.className = 'cell' + (on ? ' on' : '') + (inside ? '' : ' none') + (at === position ? ' aim' : '');
+      cell.textContent = inside ? (on ? '1' : '0') : '';
+    });
+    place(loupe, position);
+    loupe.hidden = false;
+    // Open on the side that stays inside the picture and covers the fewest marks.
+    var box = canvas.getBoundingClientRect(), size = loupe.offsetWidth, reach = 16;
+    var px = (col + 0.5) / layout.cols * box.width, py = (row + 0.5) / layout.rows * box.height, best = null;
+    [[false, false], [true, false], [false, true], [true, true]].forEach(function (side) {
+      var left = side[0] ? px - reach - size : px + reach, top = side[1] ? py - reach - size : py + reach;
+      var cost = (left < 0 || left + size > box.width ? 10 : 0) + (top < 0 || top + size > box.height ? 10 : 0);
+      Array.prototype.forEach.call(marks.children, function (mark, index) {
+        if (current && current.positions[index] === position) return;
+        var mx = parseFloat(mark.style.left) / 100 * box.width, my = parseFloat(mark.style.top) / 100 * box.height;
+        if (mx > left - 13 && mx < left + size + 13 && my > top - 13 && my < top + size + 13) cost++;
+      });
+      if (!best || cost < best.cost) best = { cost: cost, side: side };
+    });
+    loupe.classList.toggle('left', best.side[0]);
+    loupe.classList.toggle('up', best.side[1]);
+    readout.textContent = 'Bit ' + fmt(position) + ' is ' + (filter.bit(position) ? 'on.' : 'off.');
+  }
+  function lookAway() { loupe.hidden = true; readout.textContent = READOUT_IDLE; }
+
+  function probeItem(index) {
+    var item = document.createElement('li'), cell = document.createElement('span'), addr = document.createElement('span');
+    item.className = 'probe unread';
+    cell.className = 'cell'; addr.className = 'addr';
+    item.appendChild(cell); item.appendChild(addr);
+    item.addEventListener('mouseenter', function () { heat(index, true); });
+    item.addEventListener('mouseleave', function () { heat(index, false); });
+    return item;
+  }
+
+  // Pointing at one of the seven cells shows where it lives and what surrounds it.
+  function heat(index, on) {
+    var mark = marks.children[index];
+    if (!mark) return;
+    mark.classList.toggle('hot', on);
+    if (on) look(current.positions[index]); else lookAway();
+  }
+
+  function reveal(index, landed) {
+    var item = probeList.children[index], isOn = current.set[index], position = current.positions[index];
+    item.className = 'probe ' + (isOn ? 'on' : 'off') + (landed ? ' landed' : '');
+    item.firstChild.className = 'cell' + (isOn ? ' on' : '');
+    item.firstChild.textContent = isOn ? '1' : '0';
+    item.lastChild.textContent = fmt(position);
+    item.setAttribute('aria-label', 'Bit ' + fmt(position) + ' is ' + (isOn ? 'on' : 'off'));
+
+    var mark = document.createElement('span');
+    mark.className = 'mark' + (isOn ? '' : ' zero');
+    mark.textContent = String(index + 1);
+    place(mark, position);
+    if (!landed) mark.style.animation = 'none';
+    marks.appendChild(mark);
+  }
+
+  function clearProbes(waiting) {
+    marks.textContent = '';
+    loupe.hidden = true;
+    Array.prototype.forEach.call(probeList.children, function (item) {
+      item.className = 'probe ' + (waiting ? 'waiting' : 'unread');
+      item.firstChild.className = 'cell'; item.firstChild.textContent = '';
+      item.lastChild.textContent = '';
+      item.removeAttribute('aria-label');
+    });
+  }
+
+  function conclude(word) {
+    var k = filter.k, decisive = state.decisive;
+    verdict.classList.remove('pending'); reason.classList.remove('pending');
+    var pair = current.present ? impossible(word) : '';
+    if (pair) {
+      // The page can call this one: no entry in the list contains this letter pair.
+      verdict.textContent = 'Probably a word.';
+      verdict.classList.add('yes');
+      reason.innerHTML = '<span class="tag">False positive</span> All ' + k + ' bits for ' + bold(word) +
+        ' are on, so the filter has to say probably. It is wrong. No word in the list has the letters ' + quote(pair) +
+        ' together, which is the one thing the page can check without the words. This is the 1 in 100.';
+    } else if (current.present) {
+      verdict.textContent = 'Probably a word.';
+      verdict.classList.add('yes');
+      reason.innerHTML = 'All ' + k + ' bits for ' + bold(word) + ' are on. Either it is one of the ' + fmt(filter.n) +
+        ' words, or it is one of the roughly 1 in 100 strangers whose bits were all switched on by other words. ' +
+        'The page cannot tell you which. It never kept the words.';
+    } else {
+      verdict.textContent = 'Definitely not a word.';
+      verdict.classList.remove('yes');
+      reason.innerHTML = (decisive === 0 ? 'The first bit' : 'Bit ' + (decisive + 1) + ' of ' + k) + ' for ' + bold(word) +
+        ' is off: number ' + fmt(current.positions[decisive]) + '. Adding ' + bold(word) +
+        ' would have switched it on, so it was never added. One 0 is proof, and the lookup stops there.';
+    }
+    for (var i = decisive + 1; i < k; i++) probeList.children[i].className = 'probe unread';
+  }
+
+  // Letter pairs that occur in no entry of the list (nonsense.js; verified by check-nonsense.mjs).
+  function impossible(word) {
+    var joins = window.Nonsense.joins;
+    for (var i = 0; i < joins.length; i++) if (word.indexOf(joins[i]) >= 0) return joins[i];
+    return '';
+  }
+
+  function answer(raw, animate) {
     if (!filter) return;
     var word = raw.trim().toLowerCase();
     state.word = word;
-    feedToken++;
+    token++;
+    shareStatus.textContent = '';
 
     if (!word) {
-      current = null;
+      current = null; state.decisive = -1;
+      clearProbes(false);
       verdict.textContent = 'Type a word.';
-      reason.textContent = 'Any word, in any language. The deck only knows English, and only ' + fmt(filter.n) + ' words of it.';
-      probeBody.textContent = '';
-      probeCaption.textContent = 'The seven holes';
-      cardCaption.textContent = 'Card 1 of ' + fmt(cardCount()) + ', as punched. About half of every card is holes.';
+      verdict.classList.remove('yes', 'pending');
+      reason.textContent = 'Any word, in any language. The filter only knows English, and only ' + fmt(filter.n) + ' words of it.';
+      reason.classList.remove('pending');
       reproduce.textContent = '';
-      lamp.textContent = ''; lamp.className = 'lamp';
-      drawCard(0, null, '');
-      drawTray();
+      afterRow.hidden = true; proof.hidden = true;
       syncAddress('');
       return;
     }
 
     current = filter.probe(word);
-    var decisive = current.present ? filter.k - 1 : current.firstBlank;
-    var place = locate(current.positions[decisive]);
-    if (current.present) {
-      verdict.textContent = 'Probably in the list.';
-      reason.innerHTML = 'All ' + filter.k + ' holes for <strong>' + escapeHtml(quote(word)) + '</strong> are punched. ' +
-        'Either it is one of the ' + fmt(filter.n) + ' words, or it is one of the roughly 1 in 100 strangers that find ' +
-        filter.k + ' punched holes by luck. The deck cannot tell you which.';
-    } else {
-      var blanks = current.set.filter(function (s) { return !s; }).length;
-      verdict.textContent = 'Definitely not in the list.';
-      reason.innerHTML = 'Hole ' + (decisive + 1) + ' of ' + filter.k + ' for <strong>' + escapeHtml(quote(word)) +
-        '</strong> is blank: card ' + fmt(place.card) + ', column ' + place.column + ', row ' + place.row + '. ' +
-        'One blank hole is proof. ' + (blanks > 1 ? blanks + ' of its holes are blank; the reader stops at the first.' :
-        'Every other hole is punched, and it still is not there.');
-    }
-
-    lamp.textContent = current.present ? 'Probably in the list' : 'Definitely not in the list';
-    lamp.className = 'lamp ' + (current.present ? 'yes' : 'no');
-    probeCaption.textContent = 'The ' + filter.k + ' holes for ' + quote(word);
-    probeBody.textContent = '';
-    current.positions.forEach(function (position, i) {
-      var at = locate(position), row = probeBody.insertRow();
-      var cells = [String(i + 1), fmt(position), fmt(at.card), String(at.column), at.row];
-      cells.forEach(function (text, c) {
-        var cell = c === 0 ? document.createElement('th') : document.createElement('td');
-        if (c === 0) {
-          cell.scope = 'row';
-          var button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'recall';
-          button.textContent = text;
-          button.setAttribute('aria-label', 'Show the card for hole ' + (i + 1));
-          button.addEventListener('click', function () { feedToken++; show(i, true); });
-          cell.appendChild(button);
-        } else cell.textContent = text;
-        row.appendChild(cell);
-      });
-      var stateCell = row.insertCell();
-      stateCell.className = 'state' + (current.set[i] ? '' : ' blank');
-      stateCell.textContent = current.set[i] ? 'punched' : 'BLANK';
-    });
-
+    var decisive = state.decisive = current.present ? filter.k - 1 : current.firstBlank;
+    afterRow.hidden = false; proof.hidden = false;
     reproduce.innerHTML =
       'var filter = FilterBuilder.Build(' + String(filter.n).replace(/\B(?=(\d{3})+(?!\d))/g, '_') + ', 0.01);\n' +
-      'int[] holes = filter.ComputeHash("' + escapeHtml(csharp(word)) + '");\n' +
-      '<span class="muted">// ' + current.positions.join(', ') + '</span>';
-
+      'int[] bits = filter.ComputeHash("' + escapeHtml(csharp(word)) + '");\n' +
+      '<span class="c">// ' + current.positions.join(', ') + '</span>';
     syncAddress(word);
-    if (feed && !(reduceMotion && reduceMotion.matches) && decisive > 0) {
-      var token = feedToken, step = 0;
-      (function next() {
-        if (token !== feedToken) return;
-        show(step, true);
-        if (step++ < decisive) setTimeout(next, 210);
-      })();
-    } else show(decisive, false);
-  }
 
-  function escapeHtml(text) {
-    return text.replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; });
+    if (!animate || still()) {
+      clearProbes(false);
+      for (var i = 0; i <= decisive; i++) reveal(i, false);
+      conclude(word);
+      return;
+    }
+
+    var mine = token, step = 0;
+    clearProbes(true);
+    verdict.classList.add('pending'); reason.classList.add('pending');
+    (function next() {
+      if (mine !== token) return;
+      reveal(step, true);
+      if (step++ < decisive) setTimeout(next, 150);
+      else setTimeout(function () { if (mine === token) conclude(word); }, 180);
+    })();
   }
 
   var addressTimer = 0;
+  function address(word) {
+    var url = new URL(window.location.href);
+    if (word) url.searchParams.set('w', word); else url.searchParams.delete('w');
+    url.hash = '';
+    return url;
+  }
   function syncAddress(word) {
     clearTimeout(addressTimer);
     addressTimer = setTimeout(function () {
-      try {
-        var url = new URL(window.location.href);
-        if (word) url.searchParams.set('w', word); else url.searchParams.delete('w');
-        history.replaceState(null, '', url);
-      } catch (error) { /* file:// or a locked-down frame: the address simply stays put */ }
+      try { history.replaceState(null, '', address(word)); }
+      catch (error) { /* file:// or a locked-down frame: the address simply stays put */ }
     }, 400);
   }
-
-  /* ---------- Start-up ---------- */
 
   function fill(name, value) {
     Array.prototype.forEach.call(document.querySelectorAll('[data-stat="' + name + '"]'), function (node) { node.textContent = value; });
   }
 
   function selfCheck() {
-    return VECTORS.every(function (vector) {
+    return VECTORS.length > 0 && VECTORS.every(function (vector) {
       var got = Bloom.positions(vector.word, filter.m, filter.k).positions;
       return got.length === vector.positions.length && got.every(function (p, i) { return p === vector.positions[i]; }) &&
         filter.contains(vector.word) === vector.present;
-    }) && VECTORS.length > 0;
+    });
   }
 
-  function outOfOrder(title, detail) {
+  function down(title, detail) {
     filter = null; current = null;
     verdict.textContent = title;
+    verdict.classList.remove('yes', 'pending'); reason.classList.remove('pending');
     reason.textContent = detail;
-    document.documentElement.classList.add('reader-down');
+    root.classList.add('filter-down');
     input.disabled = true;
     form.querySelector('button').disabled = true;
-    var run = $('run');
-    if (run) run.disabled = true;
-    drawCard(0, null, '');
-    drawTray();
+    if ($('run')) $('run').disabled = true;
   }
 
   function start(snapshot) {
     try { filter = Bloom.load(snapshot); }
-    catch (error) { outOfOrder('The deck did not load.', error.message + ' The reference below does not depend on it.'); return; }
+    catch (error) { down('The filter did not load.', error.message + ' The reference below does not depend on it.'); return; }
     if (!selfCheck()) {
-      outOfOrder('The reader is out of order.',
+      down('The filter is switched off.',
         'In this browser the hash does not reproduce the C# library’s test vectors, so no answers are shown. The reference below is unaffected.');
       return;
     }
 
-    var setBits = filter.countSetBits(), ratio = setBits / filter.m;
+    var ratio = filter.countSetBits() / filter.m;
     fill('words', fmt(filter.n));
     fill('bits', fmt(filter.m));
-    fill('hashes', String(filter.k));
-    fill('cards', fmt(cardCount()));
     fill('kilobytes', fmt(Math.ceil(filter.m / 8) / 1000));
     fill('fill', (ratio * 100).toFixed(1) + '%');
     fill('estimate', (Math.pow(ratio, filter.k) * 100).toFixed(2) + '%');
-    fill('deck-height', height(cardCount()));
+
+    for (var i = 0; i < filter.k; i++) probeList.appendChild(probeItem(i));
+    for (var c = 0; c < LOUPE * LOUPE; c++) { loupeCells.push(document.createElement('span')); loupe.appendChild(loupeCells[c]); }
+    drawField();
 
     var asked = '';
     try { asked = new URL(window.location.href).searchParams.get('w') || ''; } catch (error) { asked = ''; }
     input.value = asked || input.value || 'bloom';
-    answer(input.value, false);
-    document.documentElement.classList.add('reader-ready');
-  }
-
-  function height(cards) {
-    var inches = cards * CARD_THICKNESS_INCHES;
-    if (inches < 24) return inches.toFixed(1) + ' inches';
-    var feet = Math.floor(inches / 12), rest = Math.round(inches - feet * 12);
-    if (rest === 12) { feet++; rest = 0; }
-    if (feet >= 5280) return (inches / 63360).toFixed(1) + ' miles';
-    return fmt(feet) + ' ft' + (rest ? ' ' + rest + ' in' : '');
-  }
-
-  form.addEventListener('submit', function (event) {
-    event.preventDefault();
     answer(input.value, true);
-    // On a small screen the verdict is below the fold: bring it into view.
-    var box = verdict.getBoundingClientRect();
-    if (box.bottom > window.innerHeight || box.top < 0) {
-      input.blur();
-      verdict.scrollIntoView({ behavior: reduceMotion && reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      answer(input.value, true);
+      // On a small screen the verdict can be below the fold: bring the answer into view.
+      var box = verdict.getBoundingClientRect();
+      if (box.bottom > window.innerHeight || box.top < 0) {
+        input.blur();
+        probeList.scrollIntoView({ behavior: still() ? 'auto' : 'smooth', block: 'center' });
+      }
+    });
+    input.addEventListener('input', function () { answer(input.value, false); });
+    Array.prototype.forEach.call(form.querySelectorAll('[data-try]'), function (button) {
+      button.addEventListener('click', function () { input.value = button.getAttribute('data-try'); answer(input.value, true); });
+    });
+
+    function read(event) {
+      if (!filter) return;
+      var box = canvas.getBoundingClientRect();
+      var x = Math.floor((event.clientX - box.left) / box.width * layout.cols), y = Math.floor((event.clientY - box.top) / box.height * layout.rows);
+      if (x < 0 || y < 0 || x >= layout.cols || y >= layout.rows) { lookAway(); return; }
+      look(y * layout.cols + x);
     }
-  });
-  input.addEventListener('input', function () { answer(input.value, false); });
+    fieldBox.addEventListener('pointermove', read);
+    fieldBox.addEventListener('pointerdown', read);
+    fieldBox.addEventListener('pointerleave', lookAway);
 
-  var resizeTimer = 0;
-  window.addEventListener('resize', function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      blankCard = null;
-      if (current) show(shown, false); else { drawCard(0, null, ''); drawTray(); }
-    }, 120);
-  });
+    var resizeTimer = 0;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(drawField, 150);
+    });
 
-  verdict.textContent = 'Loading the deck…';
-  drawCard(0, null, '');
-  drawTray();
+    shareButton.addEventListener('click', function () {
+      if (!current) return;
+      var word = state.word, url = String(address(word));
+      var bits = current.set.slice(0, state.decisive + 1).map(function (on) { return on ? '1' : '0'; }).join('');
+      var text = quote(word) + ' → ' + bits + (current.present ? ', probably a word' : ', definitely not a word') +
+        '. This page knows ' + fmt(filter.n) + ' English words and stores none of them.';
+      var copied = function () { shareStatus.textContent = 'Copied. Paste it anywhere.'; };
+      var blocked = function () { shareStatus.textContent = 'Copying is blocked here. Copy the address bar instead.'; };
+      var copy = function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text + ' ' + url).then(copied, blocked);
+        else blocked();
+      };
+      // Phones get the system share sheet; a desktop gets the clipboard.
+      var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      if (touch && navigator.share) navigator.share({ text: text, url: url }).catch(function (error) { if (error && error.name !== 'AbortError') copy(); });
+      else copy();
+    });
 
-  fetch('words.json').then(function (response) {
-    if (!response.ok) throw new Error('words.json returned ' + response.status + '.');
-    return response.json();
-  }).then(start).catch(function (error) {
-    outOfOrder('The deck did not load.', (error && error.message ? error.message + ' ' : '') + 'The reference below does not depend on it.');
-  });
+    verdict.textContent = 'Loading the filter…';
+    fetch('words.json').then(function (response) {
+      if (!response.ok) throw new Error('words.json returned ' + response.status + '.');
+      return response.json();
+    }).then(start).catch(function (error) {
+      down('The filter did not load.', (error && error.message ? error.message + ' ' : '') + 'The reference below does not depend on it.');
+    });
+  }
 
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(function () {
-      blankCard = null;
-      if (current) show(shown, false); else if (filter) { drawCard(0, null, ''); drawTray(); }
+  /* ---------- The 64-bit grid ---------- */
+
+  // FilterBuilder.Build(14, 0.113) in C#: 64 bits, 3 hashes. vectors.js carries that size, and
+  // SiteVectorTests asserts it against the library.
+  var TOY_BITS = 64, TOY_HASHES = 3, TOY_KEYS = 14;
+  var SAMPLES = ['apple', 'kiwi', 'plum', 'fig', 'pear', 'mango', 'lemon', 'peach', 'grape', 'melon', 'cherry', 'olive',
+    'guava', 'papaya', 'quince', 'banana', 'orange', 'apricot', 'coconut', 'lychee', 'nectarine', 'currant', 'damson',
+    'mulberry', 'pomelo', 'tangelo', 'yuzu', 'lime', 'date', 'raisin', 'medlar', 'loquat', 'persimmon', 'satsuma',
+    'clementine', 'kumquat', 'rhubarb', 'sloe', 'bilberry', 'greengage'];
+
+  var grid = $('grid'), toyForm = $('toy'), toyInput = $('toy-key'), toySays = $('toy-says');
+  var addedBox = grid ? document.querySelector('.added') : null, addedList = $('added');
+  var gridCount = $('grid-count'), gridOdds = $('grid-odds'), resetButton = $('toy-reset');
+  var bits = [], owner = [], keys = [], cells = [];
+
+  function toyPositions(key) {
+    var seen = {}, out = [];
+    Bloom.positions(key, TOY_BITS, TOY_HASHES).positions.forEach(function (p) { if (!seen[p]) { seen[p] = true; out.push(p); } });
+    return out.sort(function (a, b) { return a - b; });
+  }
+  function bitWord(positions) { return (positions.length === 1 ? 'bit ' : 'bits ') + list(positions.map(String)); }
+  function owners(positions) {
+    var names = [];
+    positions.forEach(function (p) { var name = bold(owner[p]); if (names.indexOf(name) < 0) names.push(name); });
+    return list(names);
+  }
+  function odds() {
+    var set = bits.filter(Boolean).length, p = Math.pow(set / TOY_BITS, TOY_HASHES) * 100;
+    return { set: set, text: p === 0 ? '0%' : p < 10 ? p.toFixed(1) + '%' : p.toFixed(0) + '%' };
+  }
+
+  function paint(aim, flipped) {
+    var on = [];
+    cells.forEach(function (cell, i) {
+      var order = flipped ? flipped.indexOf(i) : -1;
+      cell.className = 'cell' + (bits[i] ? ' on' : '') + (aim && aim.indexOf(i) >= 0 ? ' aim' : '');
+      cell.textContent = bits[i] ? '1' : '0';
+      cell.style.animationDelay = order > 0 ? order * 70 + 'ms' : '';
+      if (order >= 0) { void cell.offsetWidth; cell.classList.add('flip'); }
+      if (bits[i]) on.push(i);
+    });
+    var now = odds();
+    gridCount.textContent = now.set + ' of ' + TOY_BITS + ' bits on';
+    gridOdds.textContent = 'A stranger gets through ' + now.text + ' of the time' +
+      (keys.length > TOY_KEYS ? ', and it is ' + (keys.length - TOY_KEYS) + ' over its ' + TOY_KEYS + ' keys' : '');
+    grid.setAttribute('aria-label', 'A 64-bit Bloom filter. ' + (on.length ? 'Bits on: ' + on.join(', ') + '.' : 'No bits are on.') +
+      (aim && aim.length ? ' This key points at ' + bitWord(aim) + '.' : ''));
+    resetButton.disabled = keys.length === 0;
+  }
+
+  function say(tag, html) {
+    toySays.innerHTML = (tag ? '<span class="tag">' + tag + '</span> ' : '') + html;
+  }
+
+  function chip(key) {
+    var item = document.createElement('li'), button = document.createElement('button');
+    button.type = 'button'; button.className = 'chip'; button.textContent = key;
+    button.setAttribute('aria-label', 'Check ' + key);
+    button.addEventListener('click', function () { toyInput.value = key; check(key); });
+    item.appendChild(button); addedList.appendChild(item);
+    addedBox.hidden = false;
+  }
+
+  function insert(key) {
+    var positions = toyPositions(key), fresh = positions.filter(function (p) { return !bits[p]; });
+    fresh.forEach(function (p) { bits[p] = true; owner[p] = key; });
+    keys.push(key);
+    chip(key);
+    return { positions: positions, fresh: fresh, shared: positions.filter(function (p) { return fresh.indexOf(p) < 0; }) };
+  }
+
+  function nextSample() {
+    for (var i = 0; i < SAMPLES.length; i++) if (keys.indexOf(SAMPLES[i]) < 0) return SAMPLES[i];
+    return '';
+  }
+
+  function add(key) {
+    if (!key) { say('', 'Type a key first.'); toyInput.focus(); return; }
+    if (keys.indexOf(key) >= 0) {
+      paint(toyPositions(key));
+      say('', 'You already added ' + bold(key) + '. Adding a key twice changes nothing: its bits are on already.');
+      return;
+    }
+    var made = insert(key);
+    paint(made.positions, made.fresh);
+    if (!made.shared.length) say('', 'Added ' + bold(key) + '. It switched on ' + bitWord(made.fresh) + '.');
+    else if (made.fresh.length) say('', 'Added ' + bold(key) + '. It switched on ' + bitWord(made.fresh) + '; ' + bitWord(made.shared) +
+      (made.shared.length === 1 ? ' was' : ' were') + ' already on, from ' + owners(made.shared) + '. Keys share bits.');
+    else say('', 'Added ' + bold(key) + ', and nothing changed: ' + bitWord(made.shared) + ' were already on, from ' + owners(made.shared) +
+      '. The filter would have said possibly present before you added it.');
+    toyInput.value = nextSample();
+  }
+
+  function check(key) {
+    if (!key) { say('', 'Type a key first.'); toyInput.focus(); return; }
+    var positions = toyPositions(key), off = positions.filter(function (p) { return !bits[p]; });
+    paint(positions);
+    if (off.length) say('Definitely absent', bold(key) + ' was never added. ' + (off.length === 1 ? 'Bit ' + off[0] + ' is' : 'Bits ' + list(off.map(String)) + ' are') +
+      ' off, and adding ' + bold(key) + ' would have switched ' + (off.length === 1 ? 'it' : 'them') + ' on.');
+    else if (keys.indexOf(key) >= 0) say('Possibly present', 'Every bit for ' + bold(key) + ' is on. You did add it, but the filter cannot know that. It sees ' +
+      positions.length + ' ones and nothing else.');
+    else say('False positive', 'You never added ' + bold(key) + ', yet ' + bitWord(positions) + ' are all on, switched on by ' + owners(positions) +
+      '. The filter has to answer possibly present.');
+  }
+
+  function findStranger() {
+    if (!keys.length) { say('', 'Add some keys first. With every bit 0, nothing can be mistaken for anything.'); return; }
+    var tries = 20000, candidate = '';
+    function passes(key) { return keys.indexOf(key) < 0 && toyPositions(key).every(function (p) { return bits[p]; }); }
+    for (var s = 0; s < SAMPLES.length && !candidate; s++) if (passes(SAMPLES[s])) candidate = SAMPLES[s];
+    for (var i = 0; i < tries && !candidate; i++) { var made = window.Nonsense.make(Math.random); if (passes(made)) candidate = made; }
+    if (!candidate) {
+      say('', 'None of ' + fmt(tries) + ' made-up keys got through. With only ' + odds().set + ' bits on, that is what should happen. Add more keys and try again.');
+      return;
+    }
+    toyInput.value = candidate;
+    check(candidate);
+  }
+
+  if (grid) {
+    for (var c = 0; c < TOY_BITS; c++) {
+      var cell = document.createElement('span');
+      cell.setAttribute('data-i', String(c));
+      grid.appendChild(cell); cells.push(cell); bits.push(false); owner.push('');
+    }
+    addedBox.hidden = true;
+    paint();
+
+    toyForm.addEventListener('submit', function (event) { event.preventDefault(); add(toyInput.value.trim()); });
+    $('toy-check').addEventListener('click', function () { check(toyInput.value.trim()); });
+    $('toy-find').addEventListener('click', findStranger);
+    $('toy-five').addEventListener('click', function () {
+      var names = [], fresh = [], touched = [];
+      for (var i = 0; i < SAMPLES.length && names.length < 5; i++) {
+        if (keys.indexOf(SAMPLES[i]) >= 0) continue;
+        var made = insert(SAMPLES[i]);
+        names.push(bold(SAMPLES[i])); fresh = fresh.concat(made.fresh); touched = touched.concat(made.positions);
+      }
+      if (!names.length) { say('', 'That is every word on the page’s list. Type your own.'); return; }
+      paint(null, fresh);
+      say('', 'Added ' + list(names) + '. ' + odds().set + ' of ' + TOY_BITS + ' bits are on now. Check a key you did not add.');
+      toyInput.value = nextSample();
+    });
+    resetButton.addEventListener('click', function () {
+      for (var i = 0; i < TOY_BITS; i++) { bits[i] = false; owner[i] = ''; }
+      keys = []; addedList.textContent = ''; addedBox.hidden = true;
+      paint();
+      toyInput.value = SAMPLES[0];
+      say('', 'Cleared. Every bit is 0 again, so every key is definitely absent.');
     });
   }
 
   /* ---------- Feed it nonsense ---------- */
 
-  var runButton = $('run'), tallyBody = $('tally-rows'), passedList = $('passed'), passedNote = $('passed-note');
-  var totals = { runs: 0, read: 0, passed: 0 };
+  var runButton = $('run'), runCanvas = $('run-canvas'), runSays = $('run-says'), passedList = $('passed'), passedNote = $('passed-note');
+  var RUN = 10000, RUN_SIDE = 100;
+  var totals = { runs: 0, read: 0, passed: 0 }, runState = null, runScale = 0;
 
-  function tally(read, passed, done) {
-    var rows = [
-      ['Read', fmt(read)],
-      ['Turned away', fmt(read - passed)],
-      ['Let through', fmt(passed)],
-      ['Rate', read ? (passed / read * 100).toFixed(2) + '%' : ''],
-      ['Sized for', (filter.p * 100).toFixed(2) + '%']
-    ];
-    if (done && totals.runs > 1) {
-      rows.push(['All ' + totals.runs + ' runs', (totals.passed / totals.read * 100).toFixed(2) + '% of ' + fmt(totals.read)]);
+  // One square per made-up word: filled if the filter let it through.
+  function drawRun(from) {
+    var box = runCanvas.getBoundingClientRect(), ratio = window.devicePixelRatio || 1;
+    var cell = Math.max(2, Math.floor(box.width * ratio / RUN_SIDE));
+    var ctx = runCanvas.getContext('2d');
+    if (cell !== runScale) { runScale = cell; runCanvas.width = runCanvas.height = cell * RUN_SIDE; from = 0; ctx.clearRect(0, 0, runCanvas.width, runCanvas.height); }
+    var gap = cell > 3 ? 1 : 0, off = cssVar('--off').trim(), on = cssVar('--on').trim();
+    for (var i = from || 0; i < RUN; i++) {
+      ctx.fillStyle = runState && i < runState.read && runState.hit[i] ? on : off;
+      ctx.fillRect((i % RUN_SIDE) * cell, Math.floor(i / RUN_SIDE) * cell, cell - gap, cell - gap);
     }
-    tallyBody.textContent = '';
-    rows.forEach(function (cells) {
-      var row = tallyBody.insertRow();
-      var head = document.createElement('th'); head.scope = 'row'; head.textContent = cells[0]; row.appendChild(head);
-      row.insertCell().textContent = cells[1];
-    });
   }
 
-  function chips(words) {
+  function runSummary() {
+    var read = runState.read, passed = runState.words.length;
+    var text = fmt(read - passed) + ' turned away, ' + fmt(passed) + ' let through: ' + (read ? (passed / read * 100).toFixed(2) : '0.00') +
+      '%. Sized for ' + (filter.p * 100).toFixed(2) + '%.';
+    if (totals.runs > 1 && read === RUN) text += ' Over all ' + totals.runs + ' runs: ' + (totals.passed / totals.read * 100).toFixed(2) + '% of ' + fmt(totals.read) + '.';
+    runSays.textContent = text;
+  }
+
+  function passedChips(words) {
     passedList.textContent = '';
-    words.slice(0, 48).forEach(function (word) {
+    words.slice(0, 12).forEach(function (word) {
       var item = document.createElement('li'), button = document.createElement('button');
       button.type = 'button'; button.className = 'chip'; button.textContent = word;
-      button.setAttribute('aria-label', 'Read the cards for ' + word);
+      button.setAttribute('aria-label', 'Check ' + word + ' at the top of the page');
       button.addEventListener('click', function () {
         input.value = word;
         answer(word, true);
-        verdict.scrollIntoView({ behavior: reduceMotion && reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+        form.scrollIntoView({ behavior: still() ? 'auto' : 'smooth', block: 'start' });
         input.focus({ preventScroll: true });
       });
       item.appendChild(button); passedList.appendChild(item);
     });
-    var tail = ' None is a word, and the deck says “probably” to every one. Press one to see its seven punched holes.';
+    var tail = ' None is a word, and the filter says “probably” to every one. Press one to see its seven bits.';
     passedNote.textContent = words.length === 0 ? 'None got through this time. That is rare; run it again.' :
-      words.length > 48 ? fmt(words.length) + ' got through. Here are 48 of them.' + tail :
+      words.length > 12 ? 'Here are 12 of the ' + fmt(words.length) + ' that got through.' + tail :
       'These ' + words.length + ' got through.' + tail;
   }
 
   if (runButton) {
+    drawRun(0);
+    window.addEventListener('resize', function () { drawRun(0); });
     runButton.addEventListener('click', function () {
       if (!filter) return;
-      var total = 10000, read = 0, passed = [], batch = reduceMotion && reduceMotion.matches ? total : 400;
+      var batch = still() ? RUN : 400;
+      runState = { read: 0, hit: new Uint8Array(RUN), words: [] };
       runButton.disabled = true;
+      passedList.textContent = ''; passedNote.textContent = '';
+      drawRun(0);
       (function step() {
-        for (var i = 0; i < batch && read < total; i++, read++) {
+        var from = runState.read;
+        for (var i = 0; i < batch && runState.read < RUN; i++, runState.read++) {
           var word = window.Nonsense.make(Math.random);
-          if (filter.contains(word)) passed.push(word);
+          if (filter.contains(word)) { runState.hit[runState.read] = 1; runState.words.push(word); }
         }
-        if (read < total) { tally(read, passed.length, false); requestAnimationFrame(step); return; }
-        totals.runs++; totals.read += read; totals.passed += passed.length;
-        tally(read, passed.length, true);
-        chips(passed);
+        drawRun(from);
+        if (runState.read < RUN) { requestAnimationFrame(step); return; }
+        totals.runs++; totals.read += RUN; totals.passed += runState.words.length;
+        runSummary();
+        passedChips(runState.words);
         runButton.disabled = false;
         runButton.textContent = 'Feed it 10,000 more';
       })();
@@ -511,8 +575,7 @@
 
   /* ---------- Size your own ---------- */
 
-  var keysInput = $('keys'), rateInput = $('rate'), sizedBody = $('sized-rows'), overfillBody = $('overfill-rows');
-  var sizedCode = $('sized-code'), sizedNote = $('sized-note');
+  var keysInput = $('keys'), rateInput = $('rate'), sized = $('sized');
   var INT_MAX = 2147483647;
 
   function bytes(count) {
@@ -522,54 +585,19 @@
     return (count / 1e9).toFixed(2) + ' GB';
   }
 
-  function percent(p) {
-    var value = p * 100;
-    if (value >= 99.95) return '100%';
-    if (value >= 10) return value.toFixed(0) + '%';
-    if (value >= 1) return value.toFixed(1) + '%';
-    return value.toPrecision(2) + '%';
-  }
-
-  function rows(body, list) {
-    body.textContent = '';
-    list.forEach(function (cells) {
-      var row = body.insertRow();
-      var head = document.createElement('th'); head.scope = 'row'; head.textContent = cells[0]; row.appendChild(head);
-      row.insertCell().textContent = cells[1];
-    });
-  }
-
   function resize() {
-    if (!keysInput) return;
     var n = Number(String(keysInput.value).replace(/[,_\s]/g, '')), p = Number(rateInput.value);
     var valid = Number.isInteger(n) && n >= 1;
-    if (!valid || n > INT_MAX) {
-      rows(sizedBody, []); rows(overfillBody, []);
-      sizedCode.textContent = '';
-      sizedNote.textContent = valid ? 'FilterBuilder.Build takes an Int32 count, so one filter holds at most 2,147,483,647 keys.' :
-        'Enter a whole number of keys, 1 or more.';
+    if (!valid) { sized.textContent = 'Enter a whole number of keys, 1 or more.'; return; }
+    if (n > INT_MAX) { sized.textContent = 'FilterBuilder.Build takes an Int32 count, so one filter holds at most 2,147,483,647 keys.'; return; }
+    var made = Bloom.size(n, p);
+    if (!made) {
+      sized.textContent = 'That needs more than 2,147,483,647 bits. The library throws ArgumentOutOfRangeException rather than quietly building a smaller filter. Split the keys across several filters.';
       return;
     }
-    var sized = Bloom.size(n, p);
-    if (!sized) {
-      rows(sizedBody, []); rows(overfillBody, []);
-      sizedCode.textContent = '';
-      sizedNote.textContent = 'That needs more than 2,147,483,647 bits. The library throws ArgumentOutOfRangeException rather than quietly building a smaller filter. Split the keys across several filters.';
-      return;
-    }
-    var cards = Math.ceil(sized.m / PER_CARD);
-    rows(sizedBody, [
-      ['Bits (m)', fmt(sized.m)],
-      ['Bits per key', (sized.m / n).toFixed(2)],
-      ['Hashes (k)', String(sized.k)],
-      ['Memory', bytes(Math.ceil(sized.m / 8))],
-      ['As punched cards', fmt(cards)],
-      ['Stacked', height(cards)]
-    ]);
-    rows(overfillBody, [[0.5, 'Half as many keys as planned'], [1, 'As planned'], [1.5, 'Half again as many'], [2, 'Twice as many'], [3, 'Three times as many']]
-      .map(function (step) { return [step[1], percent(Bloom.falsePositiveRate(sized.k, sized.m, n * step[0]))]; }));
-    sizedCode.textContent = 'var filter = FilterBuilder.Build(' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '_') + ', ' + rateInput.value + ');';
-    sizedNote.textContent = 'Each key costs ' + (sized.m / n).toFixed(1) + ' bits whether it is four bytes or four kilobytes.';
+    sized.innerHTML = '<strong>' + bytes(Math.ceil(made.m / 8)) + '</strong>: ' + fmt(made.m) + ' bits, ' + made.k + ' looked at per key. Each key costs ' +
+      (made.m / n).toFixed(1) + ' bits whether it is four bytes or four kilobytes.<br><code>FilterBuilder.Build(' +
+      String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '_') + ', ' + rateInput.value + ')</code>';
   }
 
   if (keysInput) {
@@ -583,10 +611,9 @@
   Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), function (button) {
     var status = document.getElementById(button.getAttribute('aria-describedby'));
     button.addEventListener('click', function () {
-      var text = button.getAttribute('data-copy') === 'link' ? window.location.href : button.getAttribute('data-copy');
       var done = function () { if (status) status.textContent = 'Copied.'; };
       var failed = function () { if (status) status.textContent = 'Copying is blocked here. Select the text instead.'; };
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, failed);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(button.getAttribute('data-copy')).then(done, failed);
       else failed();
       if (status) setTimeout(function () { status.textContent = ''; }, 4000);
     });
