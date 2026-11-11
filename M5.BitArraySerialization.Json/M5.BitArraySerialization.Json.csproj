@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <Company>MILL5</Company>
     <Authors>MILL5</Authors>
     <PackageId>M5.BitArraySerialization.Json</PackageId>
@@ -18,12 +18,12 @@
 	<RootNamespace>M5.BitArraySerialization.Json</RootNamespace>
 	<AssemblyName>M5.BitArraySerialization.Json</AssemblyName>
 	<PackageIconUrl />
-	<Version>2.1.0</Version>
+	<Version>2.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="Pineapple" Version="1.0.41" />
+    <PackageReference Include="Pineapple" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bitarray_400-min.png">

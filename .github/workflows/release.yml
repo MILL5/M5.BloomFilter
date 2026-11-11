@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           global-json-file: global.json
+          # The SDK in global.json brings the .NET 11 runtime; tests also run on net10.0.
+          dotnet-version: 10.0.x
       - name: Restore and audit
         run: dotnet restore M5.BloomFilter.slnx -p:NuGetAuditMode=all -warnaserror:NU1901,NU1902,NU1903,NU1904
       - name: Test release

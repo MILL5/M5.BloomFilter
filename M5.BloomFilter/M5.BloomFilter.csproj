@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <Authors>MILL5</Authors>
     <Company>MILL5</Company>
     <Copyright>Copyright © MILL5, LLC 2021-2026</Copyright>
-    <Description>A Bloom filter for .NET 10. Lock-free lookups, allocation-free string, numeric and span keys, sizing from an expected count and a false-positive target, occupancy estimates, union of compatible filters, immutable snapshots, and a versioned persisted format with JSON and protobuf companion packages.</Description>
+    <Description>A Bloom filter for .NET 10 and .NET 11. Lock-free lookups, allocation-free string, numeric and span keys, sizing from an expected count and a false-positive target, occupancy estimates, union of compatible filters, immutable snapshots, and a versioned persisted format with JSON and protobuf companion packages.</Description>
     <PackageProjectUrl>https://mill5.github.io/M5.BloomFilter/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MILL5/M5.BloomFilter</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -16,7 +16,7 @@
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<NoWarn>$(NoWarn);CS1591</NoWarn>
-	<Version>2.1.0</Version>
+	<Version>2.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="Pineapple" Version="1.0.41" />
+    <PackageReference Include="Pineapple" Version="2.0.0" />
   </ItemGroup>
 
 	<ItemGroup>

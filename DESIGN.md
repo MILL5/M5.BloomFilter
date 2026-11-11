@@ -1,6 +1,6 @@
 ---
 name: M5.BloomFilter
-description: A Bloom filter for .NET 10, drawn as what it is. A square is one bit; filled is 1, empty is 0.
+description: A Bloom filter for .NET 10 and 11, drawn as what it is. A square is one bit; filled is 1, empty is 0.
 colors:
   ground: "#ffffff"
   tint: "#f1f3fc"

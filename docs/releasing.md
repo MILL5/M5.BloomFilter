@@ -1,4 +1,4 @@
-# Releasing version 2.1.0
+# Releasing version 2.2.0
 
 ## Package family
 
@@ -34,7 +34,8 @@ Pages deployment and NuGet publication continue to use `main` and release tags.
 
 ## Verification
 
-Use SDK 10.0.403 from global.json. Run:
+Use SDK 11.0.100 from global.json. The tests run on net10.0 and net11.0, so the
+.NET 10 runtime must be installed beside it. Run:
 
 ```sh
 dotnet restore M5.BloomFilter.slnx -p:NuGetAuditMode=all -warnaserror:NU1901,NU1902,NU1903,NU1904
@@ -81,9 +82,9 @@ artifacts, obtains credentials, then publishes the packages and matching symbols
 `--skip-duplicate` permits retrying a partly completed family release.
 
 Create the release on the merged commit, for example
-`gh release create v2.1.0 --target <main SHA>`; the tag must point at a commit on
+`gh release create v2.2.0 --target <main SHA>`; the tag must point at a commit on
 `main`. After publishing, verify all five version indexes and inspect each .nuspec for
-net10.0, version 2.1.0, an embedded LICENSE file matching the repository, and matching internal dependencies. NuGet indexing can lag
+net10.0 and net11.0 dependency groups, version 2.2.0, an embedded LICENSE file matching the repository, and matching internal dependencies. NuGet indexing can lag
 an accepted push. Confirm the package gallery and a clean restore before claiming
 the release is available. Version 2.0.0 is incompatible with old persisted filters;
 include [the rebuild instructions](serialization.md) in the GitHub release notes.
@@ -92,6 +93,15 @@ GitHub Pages is deployed separately from docs/site and can publish before NuGet.
 Its installation copy must accurately distinguish source and published packages.
 When a release changes what the page says about the package, merge the page
 change after the packages are verified on nuget.org.
+
+## Version 2.2.0
+
+Adds a `net11.0` build beside `net10.0` in all five packages and moves the
+Pineapple dependency from 1.0.41 to 2.0.0. No API, hashing, key encoding or
+persisted format changes, so nothing needs rebuilding when moving between
+2.0.x, 2.1.0 and 2.2.0 in either direction. .NET 10 remains supported: it is
+the LTS release, and .NET 11 is a standard-term release. See
+[the runtime and dependency record](designs/dependencies.md).
 
 ## Version 2.1.0
 
