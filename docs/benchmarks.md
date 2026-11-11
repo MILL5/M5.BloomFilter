@@ -47,11 +47,11 @@ eight-thread row, which was 34.6× (124.5 ns to 3.60 ns).
   strings; absent keys cycle through 1,024 strings that were never inserted.
 - **Eight threads** runs 250,000 lookups of present keys on each of eight
   threads against one shared filter and divides the elapsed time by two million.
-  In 2.0.1 every lookup takes the filter's lock, so the threads queue. Since
-  2.1.0 lookups take no lock.
+  In 2.0.1 every lookup takes the filter's lock, so the threads queue. From
+  2.1.0 onward, lookups take no lock.
 - **Add, new keys** fills an empty filter sized for one million keys with one
   million distinct keys in each iteration.
-- **Add, key already present** adds keys the filter already holds. Since 2.1.0 the filter
+- **Add, key already present** adds keys the filter already holds. From 2.1.0 onward, the filter
   notices that no bit would change and does not take the lock.
 
 All rows use the default strategy, `Murmur3KirschMitzenmacher`. The two Murmur3
