@@ -1,6 +1,64 @@
 # Runtime and dependency upgrade evidence
 
-Verified on 2026-11-03 against the official release feeds.
+Verified on 2026-11-03 against the official release feeds. The .NET 11 update
+below was verified on 2026-11-11.
+
+## .NET 11 update
+
+.NET 11.0.0 shipped on 2026-11-10 with SDK `11.0.100`, per the
+[official .NET 11 release metadata](https://builds.dotnet.microsoft.com/dotnet/release-metadata/11.0/releases.json).
+It is a standard-term (STS) release supported until 2028-11-14; .NET 10 remains
+the LTS channel.
+
+Decision: add .NET 11 without dropping .NET 10. The six library projects and
+four test projects target `net10.0;net11.0`; the five packages ship a `lib`
+folder and a dependency group for each. `global.json` pins SDK `11.0.100` and
+still excludes prerelease SDKs. CI installs the .NET 10 runtime (`10.0.x`)
+beside the pinned SDK so the `net10.0` tests run. The package version is
+**2.2.0**: a new target framework with no API, hashing, key encoding or
+persisted format change. Retargeting to `net11.0` alone would have removed LTS
+consumers for no gain, because no source file needs a .NET 11 API.
+
+.NET 11 adds `BitArray.PopCount()` and span constructors for `BitArray`. The
+library counts bits over its own word storage and builds exports through
+`CollectionsMarshal.AsBytes`, so neither is adopted and both targets compile
+the same source. None of the
+[documented .NET 11 breaking changes](https://learn.microsoft.com/dotnet/core/compatibility/11)
+touches an API the library calls.
+
+`tools/SiteFilter`, `tools/V201Oracle` and
+`benchmarks/M5.BloomFilter.Benchmarks` target `net11.0`. The benchmark project
+uses BenchmarkDotNet `0.16.0-preview.2`: 0.15.8, the latest stable release,
+does not recognise `net11.0` as a target and fails validation. It is the only
+prerelease package in the repository and is not referenced by any shipped
+package; see [the benchmark record](../benchmarks.md).
+
+Package changes, each the last non-prerelease entry in NuGet's flat-container
+index on 2026-11-11:
+
+| Package | Previous | Updated |
+| --- | --- | --- |
+| Microsoft.NET.Test.Sdk | 18.11.0 | 18.12.0 |
+| MSTest.TestAdapter | 4.5.2 | 4.5.3 |
+| MSTest.TestFramework | 4.5.2 | 4.5.3 |
+| BenchmarkDotNet (benchmarks only) | 0.15.8 | 0.16.0-preview.2 |
+| Pineapple | 1.0.41 | 2.0.0 |
+
+Pineapple 2.0.0 targets .NET 8 to 11 and adds `Microsoft.Extensions.Http` (and,
+on .NET 10, `Microsoft.Extensions.Logging.Abstractions`) to the packages'
+transitive dependencies. The library uses only `Pineapple.Common.Preconditions`;
+the build raises none of the PINE001 to PINE008 migration diagnostics.
+
+Verification with SDK 11.0.100, runtimes 10.0.14 and 11.0.0, macOS ARM64:
+audited restore passed; Release build passed with zero warnings and zero
+errors; **152 tests passed on each target framework** (117 core, 22 BitArray
+JSON, 3 BitArray protobuf, 10 filter serialization) in Debug and Release,
+including the fixtures written by the published 2.0.1 packages. No direct
+package is outdated and no direct or transitive package has a known
+vulnerability. Release packaging produced the five `.nupkg` and `.snupkg`
+files at 2.2.0, each with `lib/net10.0` and `lib/net11.0`.
+
+The sections below record the 2026-11-03 move to .NET 10 and are unchanged.
 
 ## Runtime
 

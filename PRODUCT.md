@@ -26,7 +26,7 @@ to follow a shared link and play with the demonstration *(inferred)*.
 
 ## Product Purpose
 
-M5.BloomFilter is a C# Bloom filter library for .NET 10 with JSON and protobuf
+M5.BloomFilter is a C# Bloom filter library for .NET 10 and .NET 11 with JSON and protobuf
 snapshot packages. The page exists to make the data structure's tradeoff
 something a visitor experiences first-hand, then to get the package installed
 and used correctly.
@@ -51,13 +51,14 @@ persisted as JSON or protobuf.
   positive answer is probable and must be confirmed against the source of truth.
 - No delete operation. Overfilling raises the false-positive rate.
 - Sixteen hash strategies; the default is Murmur3KirschMitzenmacher.
-- Version 2.1.0: lookups take no lock; string, numeric and span keys are hashed
+- Since version 2.1.0: lookups take no lock; string, numeric and span keys are hashed
   without allocating for the Murmur3 strategies; `GetOccupancy()` measures how
   full a filter is; `Union` and `UnionWith` combine compatible filters.
 - Persisted hash format version 2; older payloads must be rebuilt from keys.
 - The requested error rate is a sizing target, not a measured guarantee or an
   adversarial-input guarantee.
-- Requires .NET 10. Source-available under PolyForm Strict 1.0.0; describe it as
+- Requires .NET 10 or .NET 11; version 2.2.0 ships a build for each.
+  Source-available under PolyForm Strict 1.0.0; describe it as
   source-available, never as open source.
 
 ## Brand Commitments

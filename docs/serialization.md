@@ -1,7 +1,7 @@
 # Serialization and version 2 migration
 
-Version 2.1.0 does not change hashing, key encoding or any persisted format.
-Snapshots written by 2.0.x load in 2.1.0 and the reverse; the test suite checks
+Versions 2.1.0 and 2.2.0 do not change hashing, key encoding or any persisted format.
+Snapshots written by 2.0.x load in 2.1.0 and 2.2.0 and the reverse; the test suite checks
 both directions against fixtures written by the published 2.0.1 packages. A
 union made with `Union` or `UnionWith` serializes like any other filter.
 
@@ -71,7 +71,7 @@ storage/transport when integrity matters.
 ## Upgrade safely
 
 1. Keep original keys; bit arrays cannot recover them.
-2. Upgrade all writers and readers to version 2.0.0 and .NET 10.
+2. Upgrade all writers and readers to version 2.0.0 or later and .NET 10 or later.
 3. Rebuild each filter from its original keys and persist a new snapshot.
 4. Verify membership of all source keys before switching readers.
 5. Keep legacy and v2 stores separate during cutover and rollback.

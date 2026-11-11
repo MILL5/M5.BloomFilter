@@ -1,6 +1,6 @@
 # M5.BloomFilter
 
-A Bloom filter for .NET 10, maintained by [MILL5](https://mill5.com) and
+A Bloom filter for .NET 10 and .NET 11, maintained by [MILL5](https://mill5.com) and
 [Richard Crane, Microsoft MVP](https://richcrane.ai).
 
 A lookup returns **definitely absent** or **possibly present**. Confirm positive
@@ -14,15 +14,17 @@ are allowed. There is no delete operation.
 
 ## Get started
 
-This repository targets .NET 10 and pins SDK 10.0.403 in `global.json`.
+This repository targets .NET 10 and .NET 11 and pins SDK 11.0.100 in `global.json`.
+The tests run on both runtimes.
 Install the current
-[NuGet package](https://www.nuget.org/packages/M5.BloomFilter/2.1.0):
+[NuGet package](https://www.nuget.org/packages/M5.BloomFilter/2.2.0):
 
 ```sh
-dotnet add package M5.BloomFilter --version 2.1.0
+dotnet add package M5.BloomFilter --version 2.2.0
 ```
 
-Moving from 2.0.x needs no code or data changes. Moving from 1.x does: version 2
+Moving from 2.0.x or 2.1.0 needs no code or data changes; 2.2.0 adds a .NET 11
+build beside the .NET 10 one and changes no API. Moving from 1.x does: version 2
 changed hashing, so [rebuild persisted filters](#version-2-migration) first.
 
 ```csharp
@@ -57,7 +59,7 @@ whole.UnionWith(shard);                         // same size, hash count and str
 ReadOnlyFilter merged = snapshotA.Union(snapshotB);
 ```
 
-Hashing, key encoding and the persisted format are unchanged: 2.0.x and 2.1.0
+Hashing, key encoding and the persisted format are unchanged: 2.0.x, 2.1.0 and 2.2.0
 read each other's snapshots, and the test suite checks both directions against
 fixtures written by the published 2.0.1 packages. Measured results are in
 [docs/benchmarks.md](docs/benchmarks.md).

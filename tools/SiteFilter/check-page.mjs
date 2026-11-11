@@ -68,7 +68,7 @@ faqPage.mainEntity.forEach((entry, index) => {
   check(visible[index]?.answer === entry.acceptedAnswer.text, `answer ${index + 1} differs`);
 });
 const software = jsonLd['@graph'].find(node => node['@type'] === 'SoftwareSourceCode');
-check(html.includes(`Version ${software.softwareVersion} for .NET 10`), 'softwareVersion differs from the version on the page');
+check(html.includes(`Version ${software.softwareVersion} for .NET 10 and 11`), 'softwareVersion differs from the version on the page');
 
 // 3b. The page always carries a link preview: Open Graph and Twitter card tags
 // that point at a real 1200x630 image under the canonical address.

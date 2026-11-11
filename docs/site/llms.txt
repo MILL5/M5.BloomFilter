@@ -1,10 +1,10 @@
 # M5.BloomFilter
 
-> Source-available C# Bloom filter library for .NET 10, from MILL5 and Richard Crane, Microsoft MVP. Lock-free lookups, allocation-free keys, occupancy estimates, union of compatible filters, and versioned JSON and protobuf snapshots.
+> Source-available C# Bloom filter library for .NET 10 and .NET 11, from MILL5 and Richard Crane, Microsoft MVP. Lock-free lookups, allocation-free keys, occupancy estimates, union of compatible filters, and versioned JSON and protobuf snapshots.
 
 - Website: https://mill5.github.io/M5.BloomFilter/
 - Source: https://github.com/MILL5/M5.BloomFilter
-- Package: M5.BloomFilter 2.1.0 on NuGet (.NET 10): https://www.nuget.org/packages/M5.BloomFilter/
+- Package: M5.BloomFilter 2.2.0 on NuGet (.NET 10 and .NET 11): https://www.nuget.org/packages/M5.BloomFilter/
 - Install: `dotnet add package M5.BloomFilter`
 - Companion packages: M5.BloomFilter.Serialization.Json, M5.BloomFilter.Serialization.ProtoBuf, M5.BitArraySerialization.Json, M5.BitArraySerialization.ProtoBuf
 - License: PolyForm Strict 1.0.0 (source-available, not open source): https://github.com/MILL5/M5.BloomFilter/blob/main/LICENSE
@@ -30,19 +30,22 @@ bool no = seen.Contains("customer:43");      // false: definitely absent
 ```
 The default hash strategy is Murmur3KirschMitzenmacher; sixteen are available through `HashMethod`. Strings are hashed as UTF-8, numbers as little-endian bytes, `DateTime` as ticks. `Statistics` exposes M (bits), K (hashes), N (expected keys) and P (design false-positive estimate).
 
+## New in 2.2.0
+- Adds a .NET 11 build beside the .NET 10 one; the tests run on both runtimes. No API, hashing, key encoding or persisted format changes.
+
 ## New in 2.1.0
 - Lookups take no lock; any number of threads can query one filter. Insertions and snapshots share one lock, so a snapshot is always a consistent state.
 - String, numeric and span keys are hashed without allocating for the two Murmur3 strategies.
 - `AddKey` and `ContainsKey` accept one key as `ReadOnlySpan<byte>`, `ReadOnlySpan<char>` or `string`.
 - `GetOccupancy()` returns `BloomFilterOccupancy`: `SetBits`, `TotalBits`, `HashCount`, `FillRatio`, `EstimatedFalsePositiveRate` and `EstimatedCount`, measured from the bits set now.
 - `UnionWith` (into a filter from `FilterBuilder`) and `Union` (returns a `ReadOnlyFilter`) combine filters with equal bit count, hash count and hash strategy; `IsCompatibleWith` tests that.
-- No breaking changes. Hashing, key encoding and persisted format version 2 are unchanged; 2.0.x and 2.1.0 read each other's snapshots.
+- No breaking changes. Hashing, key encoding and persisted format version 2 are unchanged; 2.0.x, 2.1.0 and 2.2.0 read each other's snapshots.
 
 ## Snapshots and serialization
 `ToImmutable()` returns a detached `ReadOnlyFilter`. M5.BloomFilter.Serialization.Json provides `BloomFilterConverter` for System.Text.Json and Newtonsoft.Json. M5.BloomFilter.Serialization.ProtoBuf wraps a filter in `M5.BloomFilter.Serialization.BloomFilter`; restore with `AsBloomFilter()`. The core package also has `BloomFilterJsonConverter` (Newtonsoft.Json, uncompressed bits). Snapshots carry the bits, hash method, M, K, N, P and format version 2. Filters persisted by 1.x must be rebuilt from their original keys; relabelling old bits as version 2 produces false negatives.
 
 ## Measured performance
-BenchmarkDotNet 0.15.8, Apple M5 Max, .NET 10.0.14, recorded 2026-11-10, 2.0.1 against 2.1.0, mean per call: `Contains(string)` present 29.8 ns to 19.8 ns; absent 36.4 ns to 15.9 ns; `Contains(long)` 27.6 ns to 15.8 ns; `Contains(string)` with eight threads reading one filter 124.5 ns to 3.6 ns per lookup; `Add(string)` new key 38.6 ns to 29.7 ns. Allocation per call went from 56-112 bytes to zero. One machine; other hardware will differ.
+BenchmarkDotNet 0.16.0-preview.2, Apple M5 Max, .NET 11.0.0, recorded 2026-11-11, 2.0.1 against 2.2.0, mean per call: `Contains(string)` present 31.1 ns to 21.2 ns; absent 37.6 ns to 18.5 ns; `Contains(long)` 28.4 ns to 15.7 ns; `Contains(string)` with eight threads reading one filter 169.6 ns to 3.7 ns per lookup; `Add(string)` new key 35.0 ns to 31.5 ns. Allocation per call went from 56-112 bytes to zero. One machine; other hardware will differ.
 
 ## The demonstration on the website
 The page loads words.json, a snapshot of a filter holding the 172,823 words of the public-domain ENABLE word list: 1,657,884 bits (207 kB), 7 hashes, built by this library and written with `BloomFilterJsonConverter`. A JavaScript port of Murmur3KirschMitzenmacher (bloom.js) queries it in the browser and is checked against the same vectors as the C# tests, so the bit positions shown equal `ComputeHash` in C#. The page draws all 1,657,884 bits as one square image and shows the seven bits a typed word points at, stopping at the first 0 as `Contains` does. A second, 64-bit filter with 3 hashes (`FilterBuilder.Build(14, 0.113)`) lets a visitor add keys and cause a false positive. Measured over one million fixed non-words, the filter returned 10,006 false positives (1.0006%).
