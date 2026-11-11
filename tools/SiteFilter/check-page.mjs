@@ -40,12 +40,10 @@ for (const expected of sizes ?? []) {
 
 // 2. Every quoted figure matches the snapshot.
 const fmt = n => Math.round(n).toLocaleString('en-US');
-const cards = Math.ceil(filter.m / 960);
 const fill = filter.countSetBits() / filter.m;
 const stats = {
   words: fmt(filter.n),
   bits: fmt(filter.m),
-  cards: fmt(cards),
   kilobytes: fmt(Math.ceil(filter.m / 8) / 1000),
   fill: (fill * 100).toFixed(1) + '%',
   estimate: (Math.pow(fill, filter.k) * 100).toFixed(2) + '%',
@@ -56,7 +54,7 @@ for (const [name, expected] of Object.entries(stats)) {
   for (const value of found) check(value === expected, `data-stat="${name}" says ${value}, snapshot says ${expected}`);
 }
 check(!/\{\{[A-Z_]+\}\}/.test(html), 'unfilled {{PLACEHOLDER}} left in index.html');
-check(filter.k === 7, 'the page copy says seven holes; the snapshot has k = ' + filter.k);
+check(filter.k === 7, 'the page copy says seven bits; the snapshot has k = ' + filter.k);
 check(snapshot.v === 2 && snapshot.hm === 12, 'snapshot must be format 2, hash method 12');
 
 // 3. FAQ answers on the page equal the FAQPage structured data, word for word.
