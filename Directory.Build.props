@@ -2,7 +2,7 @@
   <PropertyGroup>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReleaseNotes>Version 2.1.0: lookups no longer take a lock; string, numeric and span keys are hashed without allocating for the default Murmur3 strategies; new AddKey/ContainsKey span overloads, GetOccupancy (fill ratio, estimated key count and current false-positive rate) and Union/UnionWith for combining filters built with the same settings. No breaking changes: hashing, key encoding and the persisted format (version 2) are unchanged, and 2.0.x and 2.1.0 read each other&apos;s snapshots. Version 2 requires .NET 10; filters persisted by 1.x must be rebuilt from their original keys. See README.md.</PackageReleaseNotes>
+    <PackageReleaseNotes>Version 2.2.0: adds a .NET 11 build beside the .NET 10 one and moves the Pineapple dependency to 2.0.0. No API, hashing, key encoding or persisted format changes; 2.0.x, 2.1.0 and 2.2.0 read each other&apos;s snapshots. Version 2.1.0: lookups no longer take a lock; string, numeric and span keys are hashed without allocating for the default Murmur3 strategies; new AddKey/ContainsKey span overloads, GetOccupancy (fill ratio, estimated key count and current false-positive rate) and Union/UnionWith for combining filters built with the same settings. No breaking changes: hashing, key encoding and the persisted format (version 2) are unchanged, and 2.0.x and 2.1.0 read each other&apos;s snapshots. Version 2 requires .NET 10 or later; filters persisted by 1.x must be rebuilt from their original keys. See README.md.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
